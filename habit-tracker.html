@@ -190,7 +190,17 @@ const AFFIRMATIONS = [
 ];
 
 function loadState() {
-  try { var r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); } catch(e) {}
+  try {
+    var r = localStorage.getItem(STORAGE_KEY);
+    if (r) {
+      var parsed = JSON.parse(r);
+      return {
+        habits:      parsed.habits      || DEFAULT_HABITS,
+        completions: parsed.completions || {},
+        tasks:       parsed.tasks       || {},
+      };
+    }
+  } catch(e) {}
   return { habits: DEFAULT_HABITS, completions: {}, tasks: {} };
 }
 function saveState() {
