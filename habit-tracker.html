@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ADHD Weekly Habit Tracker</title>
+<style>
+/* ====== Reset / Base ====== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, sans-serif; background: #f4f6f4; color: #1e2e1e; }
+button { cursor: pointer; }
+
+/* ====== App Shell ====== */
+.app { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.app-header {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 12px; margin-bottom: 20px;
+}
+.app-title { font-size: 1.4rem; font-weight: 700; color: #2d5a27; flex: 1; }
+
+/* ====== Section Cards ====== */
+.section-card {
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 20px; overflow: hidden;
+}
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid #e8f0e8;
+}
+.section-title {
+  font-size: 0.95rem; font-weight: 600; color: #2d5a27;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* ====== Week Selector ====== */
+.week-selector { display: flex; align-items: center; gap: 8px; }
+.week-nav { background: none; border: 1px solid #ccc; border-radius: 6px; padding: 4px 10px; font-size: 1.1rem; }
+.week-nav:hover { border-color: #4d7c3f; }
+.week-range { font-size: 0.85rem; color: #555; }
+
+/* ====== Data Controls ====== */
+.data-controls { display: flex; gap: 8px; }
+.data-btn { background: none; border: 1.5px solid #4d7c3f; border-radius: 6px; color: #4d7c3f; font-size: 0.8rem; padding: 4px 10px; }
+.data-btn:hover { background: #f0f7ee; }
+
+/* ====== Bar Chart ====== */
+.bar-chart {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 16px 20px 8px; height: 140px; position: relative;
+}
+.bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; }
+.bar-track { flex: 1; width: 100%; background: #eee; border-radius: 4px; position: relative; min-height: 80px; }
+.bar-segment { position: absolute; width: 100%; left: 0; transition: height 0.4s ease; }
+.bar-segment--habits { background: #4d7c3f; border-radius: 0 0 4px 4px; }
+.bar-segment--tasks  { background: #7aad60; border-radius: 4px 4px 0 0; }
+.bar-label { font-size: 0.7rem; color: #666; margin-top: 4px; }
+.bar-legend {
+  position: absolute; top: 8px; right: 16px;
+  display: flex; align-items: center; gap: 10px; font-size: 0.75rem; color: #555;
+}
+.legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 3px; }
+.legend-dot--habits { background: #4d7c3f; }
+.legend-dot--tasks  { background: #7aad60; }
+
+/* ====== Habit Table ====== */
+.habit-table-wrap { overflow-x: auto; padding: 0 16px; }
+.habit-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.habit-table th, .habit-table td { padding: 8px 6px; text-align: center; }
+.habit-table th { color: #555; font-weight: 600; font-size: 0.8rem; border-bottom: 1px solid #eee; }
+.habit-name-col { text-align: left; min-width: 160px; }
+.habit-day-col { width: 50px; }
+.habit-name-cell { text-align: left; font-size: 0.82rem; }
+.habit-icon { margin-right: 6px; }
+.habit-check {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ccc;
+  background: #fff; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; color: #4d7c3f; transition: all 0.15s;
+}
+.habit-check.checked { background: #4d7c3f; border-color: #4d7c3f; color: #fff; }
+.habit-check:hover { border-color: #4d7c3f; }
+.add-habit-form { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #eee; }
+.add-habit-input { flex: 1; padding: 6px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; }
+.add-habit-btn { background: #4d7c3f; color: #fff; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.85rem; }
+
+/* ====== Days Grid ====== */
+.days-grid { display: grid; grid-template-columns: repeat(5, 1fr) 1.4fr; gap: 0; padding: 0 12px 12px; }
+.day-col { border: 1px solid #e0e8e0; border-radius: 10px; margin: 4px; background: #fff; display: flex; flex-direction: column; }
+.day-col--today { box-shadow: 0 0 0 2px #4d7c3f, 0 2px 8px rgba(0,0,0,0.1); }
+.day-header { background: #4d7c3f; color: #fff; padding: 8px; text-align: center; border-radius: 10px 10px 0 0; }
+.day-name { font-weight: 700; font-size: 0.85rem; display: block; }
+.day-date { font-size: 0.75rem; opacity: 0.85; display: block; }
+.day-body { padding: 10px; flex: 1; }
+.donut-center { display: flex; justify-content: center; margin-bottom: 10px; }
+.donut-wrap { position: relative; }
+.donut-label { font-weight: 700; color: #2d5a27; font-family: system-ui, sans-serif; }
+.weekend-day-label { font-size: 0.75rem; font-weight: 600; color: #555; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ====== Task List ====== */
+.task-list { display: flex; flex-direction: column; gap: 2px; }
+.task-list-header { font-size: 0.7rem; font-weight: 700; color: #4d7c3f; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.task-items { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.task-item { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
+.task-item.done .task-text { text-decoration: line-through; color: #aaa; }
+.task-check {
+  background: none; border: 1.5px solid #ccc; border-radius: 50%;
+  width: 20px; height: 20px; font-size: 0.65rem; color: #4d7c3f;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.task-item.done .task-check { background: #4d7c3f; border-color: #4d7c3f; color: #fff; }
+.task-text { flex: 1; line-height: 1.2; }
+.task-del { background: none; border: none; color: #ccc; font-size: 0.9rem; padding: 0 2px; line-height: 1; }
+.task-del:hover { color: #e55; }
+.task-form { display: flex; gap: 4px; margin-top: 6px; }
+.task-input { flex: 1; padding: 4px 6px; border: 1px solid #ddd; border-radius: 5px; font-size: 0.78rem; }
+.task-add-btn { background: #4d7c3f; color: #fff; border: none; border-radius: 5px; width: 24px; font-size: 1rem; }
+
+/* ====== Pomodoro ====== */
+.pomodoro-section .section-header { padding: 12px 16px 0; border-bottom: none; }
+.pomodoro-row { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; }
+.pomodoro-card { background: #fff; border: 1px solid #e0e8e0; border-radius: 12px; width: 260px; flex-shrink: 0; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+.pomodoro-header { background: #0ea5e9; color: #fff; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; }
+.pomodoro-title { font-weight: 700; font-size: 0.9rem; cursor: pointer; flex: 1; }
+.pomodoro-title:hover { opacity: 0.85; }
+.pomodoro-title-input {
+  background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.5); border-radius: 4px;
+  color: #fff; font-weight: 700; font-size: 0.9rem; padding: 2px 6px; flex: 1; outline: none;
+}
+.pomodoro-remove { background: none; border: none; color: rgba(255,255,255,0.75); font-size: 1.2rem; line-height: 1; padding: 0 4px; }
+.pomodoro-remove:hover { color: #fff; }
+.pomodoro-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.pomodoro-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pomodoro-chevrons { display: flex; flex-direction: column; gap: 4px; }
+.chevron-btn {
+  background: none; border: 1px solid #cbd5e1; border-radius: 4px;
+  width: 28px; height: 28px; font-size: 0.85rem; color: #64748b;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.chevron-btn.active { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+.chevron-btn:hover:not(.active) { border-color: #0ea5e9; color: #0ea5e9; }
+.pomodoro-ring-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
+.duration-controls { display: flex; gap: 4px; margin-bottom: 4px; }
+.duration-controls button { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; width: 24px; height: 24px; font-size: 0.85rem; color: #475569; }
+.duration-controls button:hover { background: #e2e8f0; }
+.pomodoro-actions { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.play-btn { width: 40px; height: 40px; background: #0ea5e9; color: #fff; border: none; border-radius: 50%; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.play-btn:hover { background: #0284c7; }
+.reset-btn { background: none; border: 1px solid #cbd5e1; border-radius: 50%; width: 28px; height: 28px; color: #94a3b8; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+.reset-btn:hover { border-color: #64748b; color: #475569; }
+.affirmations-bar { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: #0369a1; text-align: center; min-height: 36px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.affirmation-text { animation: fadeSlide 0.5s ease; }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.pomodoro-notes { width: 100%; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; font-size: 0.78rem; color: #334155; resize: vertical; font-family: inherit; outline: none; }
+.pomodoro-notes:focus { border-color: #0ea5e9; }
+.pomodoro-notes::placeholder { color: #94a3b8; }
+.add-timer-btn { background: #0ea5e9; color: #fff; border: none; border-radius: 6px; padding: 5px 12px; font-size: 0.8rem; }
+.add-timer-btn:hover { background: #0284c7; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+// ====== Data / Storage ======
+const STORAGE_KEY = 'adhd-habit-tracker-v1';
+const DEFAULT_HABITS = [
+  { id: 'h1', name: 'Wake up at 06:00', icon: '⏰' },
+  { id: 'h2', name: 'No alcohol',        icon: '🚫' },
+  { id: 'h3', name: 'Cold shower',       icon: '🚿' },
+  { id: 'h4', name: '1 hr social media limit', icon: '📵' },
+  { id: 'h5', name: 'Budget tracking',   icon: '💰' },
+  { id: 'h6', name: 'Gym',               icon: '💪' },
+  { id: 'h7', name: 'Reading',           icon: '📚' },
+  { id: 'h8', name: 'English practice',  icon: '🗣️' },
+];
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const AFFIRMATIONS = [
+  "You've got this! One task at a time.",
+  "Progress, not perfection.",
+  "Small steps lead to big wins.",
+  "Stay focused, stay strong.",
+  "Every minute counts. Make it matter.",
+  "You are capable of amazing things.",
+  "Keep going — you're closer than you think.",
+];
+
+function loadState() {
+  try { const r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); } catch {}
+  return { habits: DEFAULT_HABITS, completions: {}, tasks: {} };
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let state = loadState();
+let weekOffset = 0;
+
+function getWeekDates(offset = 0) {
+  const today = new Date();
+  today.setDate(today.getDate() + offset * 7);
+  const day = today.getDay();
+  const sun = new Date(today); sun.setDate(today.getDate() - day);
+  return Array.from({ length: 7 }, (_, i) => { const d = new Date(sun); d.setDate(sun.getDate() + i); return d; });
+}
+function fmt(d) { return d.toISOString().slice(0, 10); }
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+// ====== Progress Utils ======
+function dayCompletion(tasks) {
+  if (!tasks || tasks.length === 0) return 0;
+  return Math.round((tasks.filter(t => t.done).length / tasks.length) * 100);
+}
+function dayStats(tasks) {
+  const arr = tasks || [];
+  return { done: arr.filter(t => t.done).length, total: arr.length };
+}
+function dayBarData(weekDates) {
+  return weekDates.map(d => {
+    const dateStr = fmt(d);
+    const hc = state.completions[dateStr] || {};
+    const dt = state.tasks[dateStr] || [];
+    return {
+      doneHabits:  state.habits.filter(h => hc[h.id]).length,
+      doneTasks:   dt.filter(t => t.done).length,
+      totalHabits: state.habits.length,
+      totalTasks:  dt.length,
+      label: DAY_NAMES[d.getDay()],
+    };
+  });
+}
+
+// ====== SVG Donut ======
+function buildDonut(pct, size, sw, done, total) {
+  const r = (size - sw) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  const showCounts = done !== undefined && total !== undefined;
+  const label = showCounts
+    ? `<text x="${size/2}" y="${size/2 + 4}" text-anchor="middle" fill="#2d5a27" font-size="${size*0.2}" font-weight="700" font-family="system-ui">${done}<tspan font-size="${size*0.15}" opacity="0.6">/${total}</tspan></text>`
+    : `<text x="${size/2}" y="${size/2 + 4}" text-anchor="middle" fill="#2d5a27" font-size="${size*0.22}" font-weight="700" font-family="system-ui">${pct}%</text>`;
+  return `<svg width="${size}" height="${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#e0e0e0" stroke-width="${sw}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#4d7c3f" stroke-width="${sw}"
+      stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
+      stroke-linecap="round" transform="rotate(-90 ${size/2} ${size/2})"
+      style="transition:stroke-dashoffset 0.4s ease"/>
+    ${label}
+  </svg>`;
+}
+
+// ====== Bar Chart ======
+function buildBarChart(weekDates) {
+  const bars = dayBarData(weekDates);
+  const cols = bars.map(d => {
+    const total = (d.totalHabits + d.totalTasks) || 1;
+    const habitH = (d.doneHabits / total) * 100;
+    const taskH  = (d.doneTasks  / total) * 100;
+    const habSeg = d.doneHabits > 0 ? `<div class="bar-segment bar-segment--habits" style="height:${habitH}%;bottom:0"></div>` : '';
+    const tskSeg = d.doneTasks  > 0 ? `<div class="bar-segment bar-segment--tasks"  style="height:${taskH}%;bottom:${habitH}%"></div>` : '';
+    return `<div class="bar-col"><div class="bar-track">${habSeg}${tskSeg}</div><div class="bar-label">${d.label}</div></div>`;
+  }).join('');
+  return `<div class="bar-chart">${cols}
+    <div class="bar-legend">
+      <span class="legend-dot legend-dot--habits"></span>Habits
+      <span class="legend-dot legend-dot--tasks"></span>Tasks
+    </div>
+  </div>`;
+}
+
+// ====== Task List ======
+function buildTaskList(dateStr, hideHeader) {
+  const tasks = state.tasks[dateStr] || [];
+  const items = tasks.map(t => `
+    <li class="task-item${t.done ? ' done' : ''}">
+      <button class="task-check" onclick="toggleTask('${dateStr}','${t.id}')">${t.done ? '✓' : '○'}</button>
+      <span class="task-text">${escHtml(t.text)}</span>
+      <button class="task-del" onclick="deleteTask('${dateStr}','${t.id}')">×</button>
+    </li>`).join('');
+  const header = hideHeader ? '' : '<div class="task-list-header">Tasks</div>';
+  return `<div class="task-list">
+    ${header}
+    <ul class="task-items">${items}</ul>
+    <form class="task-form" onsubmit="addTaskForm(event,'${dateStr}')">
+      <input class="task-input" placeholder="Add task…" />
+      <button type="submit" class="task-add-btn">+</button>
+    </form>
+  </div>`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ====== Day Column ======
+function buildDayCol(date, dateStr, isToday) {
+  const tasks = state.tasks[dateStr] || [];
+  const pct = dayCompletion(tasks);
+  const { done, total } = dayStats(tasks);
+  return `<div class="day-col${isToday ? ' day-col--today' : ''}">
+    <div class="day-header"><span class="day-name">${DAY_NAMES[date.getDay()]}</span><span class="day-date">${date.getDate()}</span></div>
+    <div class="day-body">
+      <div class="donut-center">${buildDonut(pct, 90, 10, done, total)}</div>
+      ${buildTaskList(dateStr, false)}
+    </div>
+  </div>`;
+}
+
+// ====== Weekend Column ======
+function buildWeekendColumn(sunDate, sunDateStr, satDate, satDateStr) {
+  const sunTasks = state.tasks[sunDateStr] || [];
+  const satTasks = state.tasks[satDateStr] || [];
+  const ss = dayStats(sunTasks), sa = dayStats(satTasks);
+  const combinedDone  = ss.done + sa.done;
+  const combinedTotal = ss.total + sa.total;
+  const combinedPct   = combinedTotal === 0 ? 0 : Math.round((combinedDone / combinedTotal) * 100);
+  return `<div class="day-col">
+    <div class="day-header"><span class="day-name">Weekend</span></div>
+    <div class="day-body">
+      <div class="donut-center">${buildDonut(combinedPct, 90, 10, combinedDone, combinedTotal)}</div>
+      <div class="task-list-header">Tasks</div>
+      <div class="weekend-day-label">Sun ${sunDate.getDate()}</div>
+      ${buildTaskList(sunDateStr, true)}
+      <div class="weekend-day-label">Sat ${satDate.getDate()}</div>
+      ${buildTaskList(satDateStr, true)}
+    </div>
+  </div>`;
+}
+
+// ====== Habit Tracker ======
+function buildHabitTracker(weekDates) {
+  const headers = weekDates.map(d => `<th class="habit-day-col">${DAY_NAMES[d.getDay()]}<br><span style="font-size:0.75em;font-weight:400">${d.getDate()}</span></th>`).join('');
+  const rows = state.habits.map(h => {
+    const cells = weekDates.map(d => {
+      const ds = fmt(d);
+      const done = !!(state.completions[ds] && state.completions[ds][h.id]);
+      return `<td class="habit-check-cell"><button class="habit-check${done ? ' checked' : ''}" onclick="toggleHabit('${h.id}','${ds}')">${done ? '✓' : ''}</button></td>`;
+    }).join('');
+    const icon = h.icon ? `<span class="habit-icon">${h.icon}</span>` : '';
+    return `<tr><td class="habit-name-cell">${icon}${escHtml(h.name)}</td>${cells}</tr>`;
+  }).join('');
+  return `<section class="section-card habit-section">
+    <div class="section-header"><h2 class="section-title">Habit Tracker</h2></div>
+    <div class="habit-table-wrap">
+      <table class="habit-table">
+        <thead><tr><th class="habit-name-col">Habit</th>${headers}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <form class="add-habit-form" onsubmit="addHabitForm(event)">
+      <input class="add-habit-input" placeholder="Add new habit…" />
+      <button type="submit" class="add-habit-btn">+ Add</button>
+    </form>
+  </section>`;
+}
+
+// ====== Pomodoro ======
+let pomodoroTimers = [{ id: 1 }];
+let pomodoroState  = {};  // keyed by id
+
+function getPomState(id) {
+  if (!pomodoroState[id]) {
+    pomodoroState[id] = {
+      title: 'Get Stuff Done', editingTitle: false,
+      mode: 'timer', durationMin: 25,
+      secondsLeft: 25 * 60, running: false,
+      notes: '', affirmIdx: 0,
+    };
+  }
+  return pomodoroState[id];
+}
+
+function buildTimerRingSVG(pct, displaySec, mode, size=120, sw=10) {
+  const r = (size - sw) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  const color = pct > 15 ? '#0ea5e9' : '#ef4444';
+  const textColor = pct > 15 ? '#1e293b' : '#ef4444';
+  const mm = String(Math.floor(displaySec / 60)).padStart(2, '0');
+  const ss2 = String(displaySec % 60).padStart(2, '0');
+  const modeLabel = mode === 'timer' ? 'Left' : 'Elapsed';
+  return `<svg width="${size}" height="${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="${sw}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
+      stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+      transform="rotate(-90 ${size/2} ${size/2})" style="transition:stroke-dashoffset 0.5s ease,stroke 0.5s ease"/>
+    <text x="${size/2}" y="${size/2 + 4}" text-anchor="middle" fill="${textColor}" font-size="18" font-weight="700" font-family="system-ui">${mm}:${ss2}</text>
+    <text x="${size/2}" y="${size/2 + 16}" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">${modeLabel}</text>
+  </svg>`;
+}
+
+function buildPomodoroCard(id) {
+  const s = getPomState(id);
+  const pct = s.mode === 'timer'
+    ? Math.max(0, (s.secondsLeft / (s.durationMin * 60)) * 100)
+    : 100;
+  const canRemove = pomodoroTimers.length > 1;
+  const removeBtn = canRemove ? `<button class="pomodoro-remove" onclick="removePomTimer(${id})">×</button>` : '';
+  const titleHtml = s.editingTitle
+    ? `<input class="pomodoro-title-input" value="${escHtml(s.title)}" id="ptitle-${id}"
+         onblur="savePomTitle(${id})" onkeydown="if(event.key==='Enter')savePomTitle(${id})">`
+    : `<span class="pomodoro-title" onclick="editPomTitle(${id})" title="Click to rename">${escHtml(s.title)}</span>`;
+  const durationCtrl = s.mode === 'timer' && !s.running
+    ? `<div class="duration-controls">
+        <button onclick="pomChangeDuration(${id},1)">+</button>
+        <button onclick="pomChangeDuration(${id},-1)">−</button>
+       </div>` : '';
+  const ring = buildTimerRingSVG(pct, s.secondsLeft, s.mode);
+  const affirmation = AFFIRMATIONS[s.affirmIdx];
+  return `<div class="pomodoro-card" id="pom-${id}">
+    <div class="pomodoro-header">
+      ${titleHtml}
+      ${removeBtn}
+    </div>
+    <div class="pomodoro-body">
+      <div class="pomodoro-controls">
+        <div class="pomodoro-chevrons">
+          <button class="chevron-btn${s.mode==='timer'?' active':''}" onclick="pomToggleMode(${id},'up')" title="Countdown timer">∧</button>
+          <button class="chevron-btn${s.mode==='stopwatch'?' active':''}" onclick="pomToggleMode(${id},'down')" title="Stopwatch">∨</button>
+        </div>
+        <div class="pomodoro-ring-wrap">
+          ${durationCtrl}
+          <div class="pomodoro-ring" id="pring-${id}">${ring}</div>
+        </div>
+        <div class="pomodoro-actions">
+          <button class="play-btn" onclick="pomTogglePlay(${id})">${s.running ? '⏸' : '▶'}</button>
+          <button class="reset-btn" onclick="pomReset(${id})" title="Reset">↺</button>
+        </div>
+      </div>
+      <div class="affirmations-bar" id="paff-${id}">
+        <span class="affirmation-text">${affirmation}</span>
+      </div>
+      <textarea class="pomodoro-notes" rows="3" placeholder="Add notes, tasks, or motivation…"
+        onchange="pomSaveNotes(${id},this.value)">${escHtml(s.notes)}</textarea>
+    </div>
+  </div>`;
+}
+
+function buildPomodoroSection() {
+  const cards = pomodoroTimers.map(t => buildPomodoroCard(t.id)).join('');
+  return `<section class="section-card pomodoro-section">
+    <div class="section-header">
+      <h2 class="section-title">Focus Timers</h2>
+      <button class="add-timer-btn" onclick="addPomTimer()">+ Add Timer</button>
+    </div>
+    <div class="pomodoro-row" id="pomodoro-row">${cards}</div>
+  </section>`;
+}
+
+// Pomodoro interactions
+const pomIntervals = {};
+const pomAffirmIntervals = {};
+
+function startAffirmInterval(id) {
+  if (pomAffirmIntervals[id]) return;
+  pomAffirmIntervals[id] = setInterval(() => {
+    const s = getPomState(id);
+    s.affirmIdx = (s.affirmIdx + 1) % AFFIRMATIONS.length;
+    const el = document.getElementById(`paff-${id}`);
+    if (el) el.innerHTML = `<span class="affirmation-text">${AFFIRMATIONS[s.affirmIdx]}</span>`;
+  }, 5000);
+}
+
+function pomTogglePlay(id) {
+  const s = getPomState(id);
+  s.running = !s.running;
+  if (s.running) {
+    startAffirmInterval(id);
+    pomIntervals[id] = setInterval(() => {
+      const ss = getPomState(id);
+      if (ss.mode === 'timer') {
+        if (ss.secondsLeft <= 1) { ss.secondsLeft = 0; ss.running = false; clearInterval(pomIntervals[id]); }
+        else { ss.secondsLeft--; }
+      } else {
+        ss.secondsLeft++;
+      }
+      updatePomRing(id);
+    }, 1000);
+  } else {
+    clearInterval(pomIntervals[id]);
+  }
+  // update play button
+  const playBtn = document.querySelector(`#pom-${id} .play-btn`);
+  if (playBtn) playBtn.textContent = s.running ? '⏸' : '▶';
+  updatePomRing(id);
+}
+
+function updatePomRing(id) {
+  const s = getPomState(id);
+  const pct = s.mode === 'timer'
+    ? Math.max(0, (s.secondsLeft / (s.durationMin * 60)) * 100)
+    : 100;
+  const el = document.getElementById(`pring-${id}`);
+  if (el) el.innerHTML = buildTimerRingSVG(pct, s.secondsLeft, s.mode);
+}
+
+function pomReset(id) {
+  const s = getPomState(id);
+  s.running = false; clearInterval(pomIntervals[id]);
+  s.secondsLeft = s.mode === 'timer' ? s.durationMin * 60 : 0;
+  const el = document.getElementById(`pom-${id}`);
+  if (el) { const p = document.getElementById('pomodoro-row'); p && rerenderPomCard(id); }
+  updatePomRing(id);
+  const playBtn = document.querySelector(`#pom-${id} .play-btn`);
+  if (playBtn) playBtn.textContent = '▶';
+}
+
+function rerenderPomCard(id) {
+  const el = document.getElementById(`pom-${id}`);
+  if (!el) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = buildPomodoroCard(id);
+  el.replaceWith(tmp.firstElementChild);
+}
+
+function pomToggleMode(id, dir) {
+  const s = getPomState(id);
+  s.running = false; clearInterval(pomIntervals[id]);
+  s.mode = dir === 'up' ? 'timer' : 'stopwatch';
+  s.secondsLeft = s.mode === 'timer' ? s.durationMin * 60 : 0;
+  rerenderPomCard(id);
+}
+
+function pomChangeDuration(id, delta) {
+  const s = getPomState(id);
+  if (s.running) return;
+  s.durationMin = Math.max(1, Math.min(120, s.durationMin + delta));
+  if (s.mode === 'timer') s.secondsLeft = s.durationMin * 60;
+  rerenderPomCard(id);
+}
+
+function editPomTitle(id) {
+  getPomState(id).editingTitle = true;
+  rerenderPomCard(id);
+  const inp = document.getElementById(`ptitle-${id}`);
+  if (inp) { inp.focus(); inp.select(); }
+}
+
+function savePomTitle(id) {
+  const inp = document.getElementById(`ptitle-${id}`);
+  if (inp) getPomState(id).title = inp.value || 'Focus';
+  getPomState(id).editingTitle = false;
+  rerenderPomCard(id);
+}
+
+function pomSaveNotes(id, val) {
+  getPomState(id).notes = val;
+}
+
+function addPomTimer() {
+  const id = Date.now();
+  pomodoroTimers.push({ id });
+  const row = document.getElementById('pomodoro-row');
+  if (row) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = buildPomodoroCard(id);
+    row.appendChild(tmp.firstElementChild);
+  }
+  // Update remove buttons
+  pomodoroTimers.forEach(t => {
+    const btn = document.querySelector(`#pom-${t.id} .pomodoro-remove`);
+    if (!btn && pomodoroTimers.length > 1) rerenderPomCard(t.id);
+  });
+}
+
+function removePomTimer(id) {
+  clearInterval(pomIntervals[id]);
+  clearInterval(pomAffirmIntervals[id]);
+  delete pomodoroState[id];
+  pomodoroTimers = pomodoroTimers.filter(t => t.id !== id);
+  const el = document.getElementById(`pom-${id}`);
+  if (el) el.remove();
+  if (pomodoroTimers.length === 1) rerenderPomCard(pomodoroTimers[0].id);
+}
+
+// ====== Habit/Task actions ======
+function toggleHabit(habitId, dateStr) {
+  if (!state.completions[dateStr]) state.completions[dateStr] = {};
+  state.completions[dateStr][habitId] = !state.completions[dateStr][habitId];
+  saveState(); render();
+}
+
+function addHabitForm(e) {
+  e.preventDefault();
+  const inp = e.target.querySelector('.add-habit-input');
+  const t = inp.value.trim(); if (!t) return;
+  state.habits.push({ id: 'h' + Date.now(), name: t });
+  saveState(); render();
+}
+
+function addTaskForm(e, dateStr) {
+  e.preventDefault();
+  const inp = e.target.querySelector('.task-input');
+  const t = inp.value.trim(); if (!t) return;
+  if (!state.tasks[dateStr]) state.tasks[dateStr] = [];
+  state.tasks[dateStr].push({ id: 't' + Date.now(), text: t, done: false });
+  saveState(); render();
+}
+
+function toggleTask(dateStr, taskId) {
+  const tasks = state.tasks[dateStr] || [];
+  const task = tasks.find(t => t.id === taskId);
+  if (task) task.done = !task.done;
+  saveState(); render();
+}
+
+function deleteTask(dateStr, taskId) {
+  if (!state.tasks[dateStr]) return;
+  state.tasks[dateStr] = state.tasks[dateStr].filter(t => t.id !== taskId);
+  saveState(); render();
+}
+
+// ====== Export/Import ======
+function exportData() {
+  const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'habit-tracker-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+}
+function importData() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try { state = JSON.parse(ev.target.result); saveState(); render(); }
+      catch { alert('Invalid backup file.'); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+// ====== Render ======
+function render() {
+  const weekDates = getWeekDates(weekOffset);
+  const today = todayStr();
+  const sunDate = weekDates[0]; const sunDateStr = fmt(sunDate);
+  const satDate = weekDates[6]; const satDateStr = fmt(satDate);
+  const weekdays = weekDates.slice(1, 6);
+  const startFmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const weekLabel = weekOffset === 0 ? 'This Week' : `${startFmt(weekDates[0])} – ${startFmt(weekDates[6])}`;
+
+  const dayColsHtml = weekdays.map(d => buildDayCol(d, fmt(d), fmt(d) === today)).join('') +
+    buildWeekendColumn(sunDate, sunDateStr, satDate, satDateStr);
+
+  document.getElementById('app').innerHTML = `
+    <header class="app-header">
+      <h1 class="app-title">ADHD Weekly Habit Tracker</h1>
+      <div class="data-controls">
+        <button class="data-btn" onclick="exportData()">Export Data</button>
+        <button class="data-btn" onclick="importData()">Import Data</button>
+      </div>
+      <div class="week-selector">
+        <button class="week-nav" onclick="weekOffset--;render()">‹</button>
+        <span class="week-range">${weekLabel}</span>
+        <button class="week-nav" onclick="weekOffset++;render()">›</button>
+      </div>
+    </header>
+
+    <section class="section-card progress-section">
+      <div class="section-header"><h2 class="section-title">Overall Progress</h2></div>
+      ${buildBarChart(weekDates)}
+    </section>
+
+    ${buildHabitTracker(weekDates)}
+
+    <section class="section-card tasks-section">
+      <div class="section-header"><h2 class="section-title">Weekly Tasks</h2></div>
+      <div class="days-grid">${dayColsHtml}</div>
+    </section>
+
+    ${buildPomodoroSection()}
+  `;
+
+  // Re-init affirmation intervals for any running timers
+  pomodoroTimers.forEach(t => {
+    if (getPomState(t.id).running) startAffirmInterval(t.id);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
