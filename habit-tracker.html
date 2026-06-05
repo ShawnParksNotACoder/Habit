@@ -68,9 +68,11 @@ button { cursor: pointer; }
 .habit-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .habit-table th, .habit-table td { padding: 8px 6px; text-align: center; }
 .habit-table th { color: #555; font-weight: 600; font-size: 0.8rem; border-bottom: 1px solid #eee; }
-.habit-name-col { text-align: left; min-width: 160px; }
+.habit-name-col { width: auto; min-width: 180px; }
 .habit-day-col { width: 50px; }
-.habit-name-cell { text-align: left; font-size: 0.82rem; }
+/* higher specificity to override the center rule above */
+.habit-table .habit-name-col,
+.habit-table .habit-name-cell { text-align: left; font-size: 0.82rem; }
 .habit-icon { margin-right: 6px; }
 .habit-check {
   width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ccc;
@@ -84,8 +86,8 @@ button { cursor: pointer; }
 .add-habit-btn { background: #4d7c3f; color: #fff; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.85rem; }
 
 /* ====== Days Grid ====== */
-.days-grid { display: grid; grid-template-columns: repeat(5, 1fr) 1.4fr; gap: 0; padding: 0 12px 12px; }
-.day-col { border: 1px solid #e0e8e0; border-radius: 10px; margin: 4px; background: #fff; display: flex; flex-direction: column; }
+.days-grid { display: grid; grid-template-columns: repeat(5, 1fr) 1.4fr; gap: 8px; padding: 8px 12px 12px; }
+.day-col { border: 1px solid #e0e8e0; border-radius: 10px; background: #fff; display: flex; flex-direction: column; min-width: 0; }
 .day-col--today { box-shadow: 0 0 0 2px #4d7c3f, 0 2px 8px rgba(0,0,0,0.1); }
 .day-header { background: #4d7c3f; color: #fff; padding: 8px; text-align: center; border-radius: 10px 10px 0 0; }
 .day-name { font-weight: 700; font-size: 0.85rem; display: block; }
@@ -116,10 +118,11 @@ button { cursor: pointer; }
 .task-add-btn { background: #4d7c3f; color: #fff; border: none; border-radius: 5px; width: 24px; font-size: 1rem; }
 
 /* ====== Pomodoro ====== */
-.pomodoro-section .section-header { padding: 12px 16px 0; border-bottom: none; }
-.pomodoro-row { display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; }
-.pomodoro-card { background: #fff; border: 1px solid #e0e8e0; border-radius: 12px; width: 260px; flex-shrink: 0; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-.pomodoro-header { background: #0ea5e9; color: #fff; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; }
+.pomodoro-section .section-header { padding: 12px 16px; border-bottom: 1px solid #e8f0e8; }
+/* Same grid as .days-grid so cards align column-for-column with day columns */
+.pomodoro-row { display: grid; grid-template-columns: repeat(5, 1fr) 1.4fr; gap: 8px; padding: 8px 12px 12px; }
+.pomodoro-card { background: #fff; border: 1px solid #e0e8e0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06); min-width: 0; }
+.pomodoro-header { background: #0ea5e9; color: #fff; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; border-radius: 10px 10px 0 0; }
 .pomodoro-title { font-weight: 700; font-size: 0.9rem; cursor: pointer; flex: 1; }
 .pomodoro-title:hover { opacity: 0.85; }
 .pomodoro-title-input {
@@ -129,23 +132,25 @@ button { cursor: pointer; }
 .pomodoro-remove { background: none; border: none; color: rgba(255,255,255,0.75); font-size: 1.2rem; line-height: 1; padding: 0 4px; }
 .pomodoro-remove:hover { color: #fff; }
 .pomodoro-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-.pomodoro-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.pomodoro-chevrons { display: flex; flex-direction: column; gap: 4px; }
+/* Compact vertical layout so card fits in a single day-column-width cell */
+.pomodoro-controls { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pom-ring-row { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; }
+.pomodoro-chevrons { display: flex; flex-direction: column; gap: 3px; }
 .chevron-btn {
   background: none; border: 1px solid #cbd5e1; border-radius: 4px;
-  width: 28px; height: 28px; font-size: 0.85rem; color: #64748b;
+  width: 24px; height: 24px; font-size: 0.8rem; color: #64748b;
   display: flex; align-items: center; justify-content: center; transition: all 0.15s;
 }
 .chevron-btn.active { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
 .chevron-btn:hover:not(.active) { border-color: #0ea5e9; color: #0ea5e9; }
-.pomodoro-ring-wrap { position: relative; display: flex; flex-direction: column; align-items: center; }
+.pomodoro-ring-wrap { display: flex; flex-direction: column; align-items: center; }
 .duration-controls { display: flex; gap: 4px; margin-bottom: 4px; }
-.duration-controls button { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; width: 24px; height: 24px; font-size: 0.85rem; color: #475569; }
+.duration-controls button { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; width: 22px; height: 22px; font-size: 0.8rem; color: #475569; }
 .duration-controls button:hover { background: #e2e8f0; }
-.pomodoro-actions { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.play-btn { width: 40px; height: 40px; background: #0ea5e9; color: #fff; border: none; border-radius: 50%; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.pomodoro-actions { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.play-btn { width: 32px; height: 32px; background: #0ea5e9; color: #fff; border: none; border-radius: 50%; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
 .play-btn:hover { background: #0284c7; }
-.reset-btn { background: none; border: 1px solid #cbd5e1; border-radius: 50%; width: 28px; height: 28px; color: #94a3b8; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+.reset-btn { background: none; border: 1px solid #cbd5e1; border-radius: 50%; width: 24px; height: 24px; color: #94a3b8; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; }
 .reset-btn:hover { border-color: #64748b; color: #475569; }
 .affirmations-bar { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: #0369a1; text-align: center; min-height: 36px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .affirmation-text { animation: fadeSlide 0.5s ease; }
@@ -185,7 +190,7 @@ const AFFIRMATIONS = [
 ];
 
 function loadState() {
-  try { const r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); } catch {}
+  try { var r = localStorage.getItem(STORAGE_KEY); if (r) return JSON.parse(r); } catch(e) {}
   return { habits: DEFAULT_HABITS, completions: {}, tasks: {} };
 }
 function saveState() {
@@ -383,8 +388,8 @@ function buildTimerRingSVG(pct, displaySec, mode, size=120, sw=10) {
     <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
       stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
       transform="rotate(-90 ${size/2} ${size/2})" style="transition:stroke-dashoffset 0.5s ease,stroke 0.5s ease"/>
-    <text x="${size/2}" y="${size/2 + 4}" text-anchor="middle" fill="${textColor}" font-size="18" font-weight="700" font-family="system-ui">${mm}:${ss2}</text>
-    <text x="${size/2}" y="${size/2 + 16}" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="system-ui">${modeLabel}</text>
+    <text x="${size/2}" y="${size/2 + 4}" text-anchor="middle" fill="${textColor}" font-size="${size*0.18}" font-weight="700" font-family="system-ui">${mm}:${ss2}</text>
+    <text x="${size/2}" y="${size/2 + size*0.18}" text-anchor="middle" fill="#94a3b8" font-size="${size*0.1}" font-family="system-ui">${modeLabel}</text>
   </svg>`;
 }
 
@@ -404,7 +409,7 @@ function buildPomodoroCard(id) {
         <button onclick="pomChangeDuration(${id},1)">+</button>
         <button onclick="pomChangeDuration(${id},-1)">−</button>
        </div>` : '';
-  const ring = buildTimerRingSVG(pct, s.secondsLeft, s.mode);
+  const ring = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 90, 9);
   const affirmation = AFFIRMATIONS[s.affirmIdx];
   return `<div class="pomodoro-card" id="pom-${id}">
     <div class="pomodoro-header">
@@ -413,17 +418,19 @@ function buildPomodoroCard(id) {
     </div>
     <div class="pomodoro-body">
       <div class="pomodoro-controls">
-        <div class="pomodoro-chevrons">
-          <button class="chevron-btn${s.mode==='timer'?' active':''}" onclick="pomToggleMode(${id},'up')" title="Countdown timer">∧</button>
-          <button class="chevron-btn${s.mode==='stopwatch'?' active':''}" onclick="pomToggleMode(${id},'down')" title="Stopwatch">∨</button>
-        </div>
-        <div class="pomodoro-ring-wrap">
-          ${durationCtrl}
-          <div class="pomodoro-ring" id="pring-${id}">${ring}</div>
-        </div>
-        <div class="pomodoro-actions">
-          <button class="play-btn" onclick="pomTogglePlay(${id})">${s.running ? '⏸' : '▶'}</button>
-          <button class="reset-btn" onclick="pomReset(${id})" title="Reset">↺</button>
+        ${durationCtrl}
+        <div class="pom-ring-row">
+          <div class="pomodoro-chevrons">
+            <button class="chevron-btn${s.mode==='timer'?' active':''}" onclick="pomToggleMode(${id},'up')" title="Countdown timer">&#8743;</button>
+            <button class="chevron-btn${s.mode==='stopwatch'?' active':''}" onclick="pomToggleMode(${id},'down')" title="Stopwatch">&#8744;</button>
+          </div>
+          <div class="pomodoro-ring-wrap">
+            <div class="pomodoro-ring" id="pring-${id}">${ring}</div>
+          </div>
+          <div class="pomodoro-actions">
+            <button class="play-btn" onclick="pomTogglePlay(${id})">${s.running ? '&#9646;&#9646;' : '&#9654;'}</button>
+            <button class="reset-btn" onclick="pomReset(${id})" title="Reset">&#8634;</button>
+          </div>
         </div>
       </div>
       <div class="affirmations-bar" id="paff-${id}">
@@ -490,7 +497,7 @@ function updatePomRing(id) {
     ? Math.max(0, (s.secondsLeft / (s.durationMin * 60)) * 100)
     : 100;
   const el = document.getElementById(`pring-${id}`);
-  if (el) el.innerHTML = buildTimerRingSVG(pct, s.secondsLeft, s.mode);
+  if (el) el.innerHTML = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 90, 9);
 }
 
 function pomReset(id) {
@@ -624,7 +631,7 @@ function importData() {
     const reader = new FileReader();
     reader.onload = ev => {
       try { state = JSON.parse(ev.target.result); saveState(); render(); }
-      catch { alert('Invalid backup file.'); }
+      catch(e) { alert('Invalid backup file.'); }
     };
     reader.readAsText(file);
   };
@@ -679,7 +686,12 @@ function render() {
   });
 }
 
-render();
+try {
+  render();
+} catch(e) {
+  document.getElementById('app').innerHTML =
+    '<div style="padding:24px;color:#c00;font-family:monospace;white-space:pre-wrap"><b>Error loading tracker:</b>\n' + e.message + '\n' + e.stack + '</div>';
+}
 </script>
 </body>
 </html>
