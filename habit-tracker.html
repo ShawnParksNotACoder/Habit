@@ -370,7 +370,7 @@
     /* click-to-edit duration overlay */
     .pom-dur-input-wrap {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      width: 100px; height: 100px;
+      width: 106px; height: 106px;
     }
     .pom-dur-label { font-size: .7rem; color: #64748b; margin-bottom: 5px; }
     .pom-dur-input {
@@ -378,6 +378,9 @@
       font-size: 1.5rem; font-weight: 700; color: var(--accent-color-1);
       border: 2px solid var(--accent-color-1); border-radius: 8px; outline: none;
     }
+    /* SVG ring: stroke driven by CSS so --accent-color-1 always applies */
+    .pom-ring-progress { stroke: var(--accent-color-1); transition: stroke-dashoffset .5s; }
+    .pom-ring-progress.urgent { stroke: #ef4444; transition: stroke-dashoffset .5s, stroke .5s; }
     .affirmations-bar {
       background: rgba(0,0,0,.02); border: 1px solid var(--accent-color-1); border-radius: 6px;
       padding: 6px 10px; font-size: .75rem; color: var(--text-color); text-align: center;
@@ -742,21 +745,22 @@ function buildDonut(pct, size, sw) {
     '</div>';
 }
 function buildTimerRingSVG(pct, secs, mode, size, sw) {
-  if (!size) size = 90; if (!sw) sw = 9;
+  if (!size) size = 106; if (!sw) sw = 10;
   var r = (size - sw) / 2, circ = 2 * Math.PI * r;
   var offset = circ - (pct / 100) * circ;
-  var accentCol = cssVar('--accent-color-1', '#0ea5e9');
-  var color = pct > 15 ? accentCol : '#ef4444';
-  var textColor = pct > 15 ? '#1e293b' : '#ef4444';
+  var urgent = pct <= 15;
+  var textColor = urgent ? '#ef4444' : '#1e293b';
   var mm = String(Math.floor(secs / 60)).padStart(2,'0');
   var ss = String(secs % 60).padStart(2,'0');
   var modeLabel = mode === 'timer' ? 'Left' : 'Elapsed';
   var cx = size / 2;
+  // progress circle uses class="pom-ring-progress" so stroke comes from CSS var(--accent-color-1)
   return '<svg width="' + size + '" height="' + size + '">' +
     '<circle cx="' + cx + '" cy="' + cx + '" r="' + r + '" fill="none" stroke="#e2e8f0" stroke-width="' + sw + '"/>' +
-    '<circle cx="' + cx + '" cy="' + cx + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + sw + '"' +
+    '<circle cx="' + cx + '" cy="' + cx + '" r="' + r + '" fill="none" stroke-width="' + sw + '"' +
+    ' class="pom-ring-progress' + (urgent ? ' urgent' : '') + '"' +
     ' stroke-dasharray="' + circ.toFixed(2) + '" stroke-dashoffset="' + offset.toFixed(2) + '" stroke-linecap="round"' +
-    ' transform="rotate(-90 ' + cx + ' ' + cx + ')" style="transition:stroke-dashoffset .5s,stroke .5s"/>' +
+    ' transform="rotate(-90 ' + cx + ' ' + cx + ')"/>' +
     '<text x="' + cx + '" y="' + (cx + 4) + '" text-anchor="middle" fill="' + textColor + '"' +
     ' font-size="' + (size * 0.18) + '" font-weight="700" font-family="system-ui">' + mm + ':' + ss + '</text>' +
     '<text x="' + cx + '" y="' + (cx + size * 0.18) + '" text-anchor="middle" fill="#94a3b8"' +
@@ -992,7 +996,7 @@ function buildPomodoroCard(id) {
       ' onkeydown="if(event.key===\'Enter\')savePomDuration(' + id + ')">' +
       '</div>';
   } else {
-    var ring = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 100, 10);
+    var ring = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 106, 10);
     var clickable = (s.mode === 'timer' && !s.running);
     ringOrInput = '<div class="pomodoro-ring"' +
       (clickable ? ' onclick="editPomDuration(' + id + ')" style="cursor:pointer;" title="Click to change duration"' : '') +
@@ -1237,7 +1241,7 @@ function updatePomRing(id) {
   var s = getPomState(id);
   var pct = s.mode === 'timer' ? Math.max(0, (s.secondsLeft / (s.durationMin * 60)) * 100) : 100;
   var el = document.getElementById('pring-' + id);
-  if (el) el.innerHTML = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 100, 10);
+  if (el) el.innerHTML = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 106, 10);
 }
 function pomReset(id) {
   var s = getPomState(id); s.running = false; clearInterval(pomIntervals[id]);
