@@ -14,6 +14,9 @@
       --header-color: #4d7c3f;
       --accent-color-1: #4d7c3f;
       --accent-color-2: #5a8a49;
+      --sub-heading-color: #d1d5db;
+      --sub-heading-text-color: #222222;
+      --alternate-color-1: #f9fafb;
       --header-text-color: #ffffff;
       --accent-1-text-color: #ffffff;
       --accent-2-text-color: #ffffff;
@@ -327,18 +330,18 @@
       box-shadow: 0 1px 4px rgba(0,0,0,.06); min-width: 0;
     }
     .pomodoro-header {
-      background: var(--accent-color-2); color: var(--accent-2-text-color); padding: 8px 12px;
+      background: var(--sub-heading-color); color: var(--sub-heading-text-color); padding: 8px 12px;
       display: flex; align-items: center; justify-content: space-between;
     }
     .pomodoro-title { font-weight: 700; font-size: .9rem; cursor: pointer; flex: 1; }
-    .pomodoro-title:hover { opacity: .85; }
+    .pomodoro-title:hover { opacity: .7; }
     .pomodoro-title-input {
-      background: rgba(255,255,255,.25); border: 1px solid rgba(255,255,255,.5);
-      border-radius: 4px; color: #fff; font-weight: 700; font-size: .9rem;
-      padding: 2px 6px; flex: 1; outline: none;
+      background: rgba(0,0,0,.08); border: 1px solid var(--sub-heading-text-color);
+      border-radius: 4px; color: var(--sub-heading-text-color); font-weight: 700; font-size: .9rem;
+      padding: 2px 6px; flex: 1; outline: none; opacity: .9;
     }
-    .pomodoro-remove { background: none; border: none; color: rgba(255,255,255,.75); font-size: 1.2rem; line-height: 1; padding: 0 4px; }
-    .pomodoro-remove:hover { color: #fff; }
+    .pomodoro-remove { background: none; border: none; color: var(--sub-heading-text-color); opacity: .55; font-size: 1.2rem; line-height: 1; padding: 0 4px; }
+    .pomodoro-remove:hover { opacity: 1; }
     .pomodoro-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
     .pomodoro-controls { display: flex; flex-direction: column; align-items: center; gap: 6px; }
     .pom-ring-row { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; }
@@ -353,9 +356,9 @@
     .pomodoro-ring-wrap { display: flex; align-items: center; justify-content: center; }
     /* play button lives in the header */
     .pom-play-btn {
-      width: 28px; height: 28px; background: rgba(0,0,0,.15);
-      border: 1.5px solid var(--accent-2-text-color); border-radius: 50%;
-      color: var(--accent-2-text-color); opacity: .8;
+      width: 28px; height: 28px; background: rgba(0,0,0,.12);
+      border: 1.5px solid var(--sub-heading-text-color); border-radius: 50%;
+      color: var(--sub-heading-text-color); opacity: .7;
       font-size: .78rem; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center; transition: opacity .15s;
     }
@@ -393,7 +396,7 @@
       padding: 6px 8px; font-size: .75rem; color: #334155;
       resize: vertical; outline: none; min-height: 52px;
     }
-    .pomodoro-notes:focus { border-color: #0ea5e9; }
+    .pomodoro-notes:focus { border-color: var(--accent-color-1); }
     .pomodoro-notes::placeholder { color: #94a3b8; }
     .add-timer-btn {
       background: rgba(255,255,255,.2); color: #fff;
@@ -490,10 +493,16 @@ var AFFIRMATIONS = [
    THEME
    ============================================================ */
 var DEFAULT_THEME = {
-  buttonColor: '#4d7c3f', buttonTextColor: '#ffffff',
-  wallpaperColor: '#f0f2ed', pageColor: '#f7f8f5',
-  sectionColor: '#ffffff', headerColor: '#4d7c3f',
-  accentColor1: '#4d7c3f', accentColor2: '#5a8a49'
+  wallpaperColor:  '#e5e7eb',
+  pageColor:       '#f3f4f6',
+  sectionColor:    '#ffffff',
+  alternateColor1: '#f9fafb',
+  headerColor:     '#b91c1c',
+  subHeadingColor: '#d1d5db',
+  accentColor1:    '#ef4444',
+  accentColor2:    '#fca5a5',
+  buttonColor:     '#dc2626',
+  buttonTextColor: '#ffffff',
 };
 
 function readTheme() {
@@ -540,10 +549,14 @@ function applyTheme(theme) {
   root.style.setProperty('--header-color',       theme.headerColor);
   root.style.setProperty('--accent-color-1',     theme.accentColor1);
   root.style.setProperty('--accent-color-2',     theme.accentColor2);
-  root.style.setProperty('--header-text-color',   getContrastTextColor(theme.headerColor));
-  root.style.setProperty('--accent-1-text-color', getContrastTextColor(theme.accentColor1));
-  root.style.setProperty('--accent-2-text-color', getContrastTextColor(theme.accentColor2));
+  root.style.setProperty('--header-text-color',      getContrastTextColor(theme.headerColor));
+  root.style.setProperty('--accent-1-text-color',    getContrastTextColor(theme.accentColor1));
+  root.style.setProperty('--accent-2-text-color',    getContrastTextColor(theme.accentColor2));
   root.style.setProperty('--week-select-text-color', getContrastTextColor(theme.sectionColor));
+  var subHdg = theme.subHeadingColor || DEFAULT_THEME.subHeadingColor;
+  root.style.setProperty('--sub-heading-color',      subHdg);
+  root.style.setProperty('--sub-heading-text-color', getContrastTextColor(subHdg));
+  root.style.setProperty('--alternate-color-1',      theme.alternateColor1 || DEFAULT_THEME.alternateColor1);
 }
 
 function cssVar(name, fallback) {
