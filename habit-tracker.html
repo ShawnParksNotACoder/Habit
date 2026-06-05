@@ -350,26 +350,32 @@
     }
     .chevron-btn.active { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
     .chevron-btn:hover:not(.active) { border-color: #0ea5e9; color: #0ea5e9; }
-    .pomodoro-ring-wrap { display: flex; flex-direction: column; align-items: center; }
-    .duration-controls { display: flex; gap: 4px; margin-bottom: 4px; }
-    .duration-controls button {
-      background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px;
-      width: 22px; height: 22px; font-size: .8rem; color: #475569;
-    }
-    .duration-controls button:hover { background: #e2e8f0; }
-    .pomodoro-actions { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-    .play-btn {
-      width: 32px; height: 32px; background: #0ea5e9; color: #fff;
-      border: none; border-radius: 50%; font-size: .9rem;
+    .pomodoro-ring-wrap { display: flex; align-items: center; justify-content: center; }
+    /* play button lives in the header */
+    .pom-play-btn {
+      width: 28px; height: 28px; background: rgba(255,255,255,.22);
+      border: 1.5px solid rgba(255,255,255,.45); border-radius: 50%; color: #fff;
+      font-size: .78rem; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center; transition: background .15s;
     }
-    .play-btn:hover { background: #0284c7; }
+    .pom-play-btn:hover { background: rgba(255,255,255,.45); }
     .reset-btn {
       background: none; border: 1px solid #cbd5e1; border-radius: 50%;
       width: 24px; height: 24px; color: #94a3b8; font-size: .75rem;
       display: flex; align-items: center; justify-content: center;
     }
     .reset-btn:hover { border-color: #64748b; color: #475569; }
+    /* click-to-edit duration overlay */
+    .pom-dur-input-wrap {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 100px; height: 100px;
+    }
+    .pom-dur-label { font-size: .7rem; color: #64748b; margin-bottom: 5px; }
+    .pom-dur-input {
+      width: 72px; padding: 5px 6px; text-align: center;
+      font-size: 1.5rem; font-weight: 700; color: #0ea5e9;
+      border: 2px solid #0ea5e9; border-radius: 8px; outline: none;
+    }
     .affirmations-bar {
       background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px;
       padding: 6px 10px; font-size: .75rem; color: #0369a1; text-align: center;
@@ -947,7 +953,7 @@ function getPomState(id) {
     pomodoroState[id] = {
       title: 'Get Stuff Done', editingTitle: false,
       mode: 'timer', durationMin: 25, secondsLeft: 25 * 60,
-      running: false, notes: '', affirmIdx: 0
+      running: false, notes: '', affirmIdx: 0, editingDuration: false
     };
   }
   return pomodoroState[id];
@@ -962,24 +968,40 @@ function buildPomodoroCard(id) {
     ? '<input class="pomodoro-title-input" value="' + esc(s.title) + '" id="ptitle-' + id + '"' +
       ' onblur="savePomTitle(' + id + ')" onkeydown="if(event.key===\'Enter\')savePomTitle(' + id + ')">'
     : '<span class="pomodoro-title" onclick="editPomTitle(' + id + ')" title="Click to rename">' + esc(s.title) + '</span>';
-  var durCtrl = (s.mode === 'timer' && !s.running)
-    ? '<div class="duration-controls"><button onclick="pomChangeDuration(' + id + ',1)">+</button>' +
-      '<button onclick="pomChangeDuration(' + id + ',-1)">&minus;</button></div>' : '';
-  var ring = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 90, 9);
+  // play/pause button in the header
+  var playBtn = '<button class="pom-play-btn" id="ppbtn-' + id + '" onclick="pomTogglePlay(' + id + ')">' +
+    (s.running ? '&#9646;&#9646;' : '&#9654;') + '</button>';
+  // ring or click-to-edit duration input
+  var ringOrInput;
+  if (s.editingDuration) {
+    ringOrInput = '<div class="pom-dur-input-wrap">' +
+      '<div class="pom-dur-label">Minutes (1&ndash;120):</div>' +
+      '<input type="number" class="pom-dur-input" id="pdur-' + id + '"' +
+      ' value="' + s.durationMin + '" min="1" max="120"' +
+      ' onblur="savePomDuration(' + id + ')"' +
+      ' onkeydown="if(event.key===\'Enter\')savePomDuration(' + id + ')">' +
+      '</div>';
+  } else {
+    var ring = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 100, 10);
+    var clickable = (s.mode === 'timer' && !s.running);
+    ringOrInput = '<div class="pomodoro-ring"' +
+      (clickable ? ' onclick="editPomDuration(' + id + ')" style="cursor:pointer;" title="Click to change duration"' : '') +
+      ' id="pring-' + id + '">' + ring + '</div>';
+  }
+  // ∧ = stopwatch (count up),  ∨ = timer (countdown)
+  var chevrons =
+    '<button class="chevron-btn' + (s.mode==='stopwatch'?' active':'') + '" onclick="pomToggleMode(' + id + ',\'up\')" title="Stopwatch (count up)">&#8743;</button>' +
+    '<button class="chevron-btn' + (s.mode==='timer'?' active':'') + '" onclick="pomToggleMode(' + id + ',\'down\')" title="Countdown timer">&#8744;</button>';
   return '<div class="pomodoro-card" id="pom-' + id + '">' +
-    '<div class="pomodoro-header">' + titleHtml + rmBtn + '</div>' +
+    '<div class="pomodoro-header">' + titleHtml + playBtn + rmBtn + '</div>' +
     '<div class="pomodoro-body">' +
-    '<div class="pomodoro-controls">' + durCtrl +
-    '<div class="pom-ring-row">' +
-    '<div class="pomodoro-chevrons">' +
-    '<button class="chevron-btn' + (s.mode==='timer'?' active':'') + '" onclick="pomToggleMode(' + id + ',\'up\')" title="Countdown">&#8743;</button>' +
-    '<button class="chevron-btn' + (s.mode==='stopwatch'?' active':'') + '" onclick="pomToggleMode(' + id + ',\'down\')" title="Stopwatch">&#8744;</button>' +
-    '</div>' +
-    '<div class="pomodoro-ring-wrap"><div class="pomodoro-ring" id="pring-' + id + '">' + ring + '</div></div>' +
-    '<div class="pomodoro-actions">' +
-    '<button class="play-btn" onclick="pomTogglePlay(' + id + ')">' + (s.running ? '&#9646;&#9646;' : '&#9654;') + '</button>' +
+    '<div class="pomodoro-controls"><div class="pom-ring-row">' +
+    '<div class="pomodoro-chevrons">' + chevrons + '</div>' +
+    '<div class="pomodoro-ring-wrap">' + ringOrInput + '</div>' +
+    '<div style="display:flex;flex-direction:column;align-items:center;">' +
     '<button class="reset-btn" onclick="pomReset(' + id + ')" title="Reset">&#8634;</button>' +
-    '</div></div></div>' +
+    '</div>' +
+    '</div></div>' +
     '<div class="affirmations-bar" id="paff-' + id + '"><span class="affirmation-text">' + AFFIRMATIONS[s.affirmIdx] + '</span></div>' +
     '<textarea class="pomodoro-notes" rows="3" placeholder="Notes, tasks, motivation…"' +
     ' onchange="pomSaveNotes(' + id + ',this.value)">' + esc(s.notes) + '</textarea>' +
@@ -1165,7 +1187,7 @@ function pomTogglePlay(id) {
       updatePomRing(id);
     }, 1000);
   } else { clearInterval(pomIntervals[id]); }
-  var btn = document.querySelector('#pom-' + id + ' .play-btn');
+  var btn = document.getElementById('ppbtn-' + id);
   if (btn) btn.innerHTML = s.running ? '&#9646;&#9646;' : '&#9654;';
   updatePomRing(id);
 }
@@ -1173,7 +1195,7 @@ function updatePomRing(id) {
   var s = getPomState(id);
   var pct = s.mode === 'timer' ? Math.max(0, (s.secondsLeft / (s.durationMin * 60)) * 100) : 100;
   var el = document.getElementById('pring-' + id);
-  if (el) el.innerHTML = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 90, 9);
+  if (el) el.innerHTML = buildTimerRingSVG(pct, s.secondsLeft, s.mode, 100, 10);
 }
 function pomReset(id) {
   var s = getPomState(id); s.running = false; clearInterval(pomIntervals[id]);
@@ -1188,7 +1210,7 @@ function rerenderPomCard(id) {
 }
 function pomToggleMode(id, dir) {
   var s = getPomState(id); s.running = false; clearInterval(pomIntervals[id]);
-  s.mode = dir === 'up' ? 'timer' : 'stopwatch';
+  s.mode = dir === 'up' ? 'stopwatch' : 'timer';
   s.secondsLeft = s.mode === 'timer' ? s.durationMin * 60 : 0;
   rerenderPomCard(id);
 }
@@ -1196,6 +1218,27 @@ function pomChangeDuration(id, delta) {
   var s = getPomState(id); if (s.running) return;
   s.durationMin = Math.max(1, Math.min(120, s.durationMin + delta));
   if (s.mode === 'timer') s.secondsLeft = s.durationMin * 60;
+  rerenderPomCard(id);
+}
+function editPomDuration(id) {
+  var s = getPomState(id);
+  if (s.running || s.mode !== 'timer') return;
+  s.editingDuration = true;
+  rerenderPomCard(id);
+  var inp = document.getElementById('pdur-' + id);
+  if (inp) { inp.focus(); inp.select(); }
+}
+function savePomDuration(id) {
+  var inp = document.getElementById('pdur-' + id);
+  if (inp) {
+    var val = parseInt(inp.value, 10);
+    if (!isNaN(val) && val >= 1 && val <= 120) {
+      var s = getPomState(id);
+      s.durationMin = val;
+      s.secondsLeft = val * 60;
+    }
+  }
+  getPomState(id).editingDuration = false;
   rerenderPomCard(id);
 }
 function editPomTitle(id) {
