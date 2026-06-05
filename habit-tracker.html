@@ -327,7 +327,7 @@
       box-shadow: 0 1px 4px rgba(0,0,0,.06); min-width: 0;
     }
     .pomodoro-header {
-      background: #0ea5e9; color: #fff; padding: 8px 12px;
+      background: var(--accent-color-2); color: var(--accent-2-text-color); padding: 8px 12px;
       display: flex; align-items: center; justify-content: space-between;
     }
     .pomodoro-title { font-weight: 700; font-size: .9rem; cursor: pointer; flex: 1; }
@@ -348,23 +348,25 @@
       width: 24px; height: 24px; font-size: .8rem; color: #64748b;
       display: flex; align-items: center; justify-content: center; transition: all .15s;
     }
-    .chevron-btn.active { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
-    .chevron-btn:hover:not(.active) { border-color: #0ea5e9; color: #0ea5e9; }
+    .chevron-btn.active { background: var(--accent-color-1); border-color: var(--accent-color-1); color: var(--accent-1-text-color); }
+    .chevron-btn:hover:not(.active) { border-color: var(--accent-color-1); color: var(--accent-color-1); }
     .pomodoro-ring-wrap { display: flex; align-items: center; justify-content: center; }
     /* play button lives in the header */
     .pom-play-btn {
-      width: 28px; height: 28px; background: rgba(255,255,255,.22);
-      border: 1.5px solid rgba(255,255,255,.45); border-radius: 50%; color: #fff;
+      width: 28px; height: 28px; background: rgba(0,0,0,.15);
+      border: 1.5px solid var(--accent-2-text-color); border-radius: 50%;
+      color: var(--accent-2-text-color); opacity: .8;
       font-size: .78rem; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; transition: background .15s;
+      display: flex; align-items: center; justify-content: center; transition: opacity .15s;
     }
-    .pom-play-btn:hover { background: rgba(255,255,255,.45); }
+    .pom-play-btn:hover { opacity: 1; }
     .reset-btn {
-      background: none; border: 1px solid #cbd5e1; border-radius: 50%;
-      width: 24px; height: 24px; color: #94a3b8; font-size: .75rem;
+      background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px;
+      width: 28px; height: 22px; color: #64748b; font-size: .72rem;
       display: flex; align-items: center; justify-content: center;
+      transition: background .15s, border-color .15s;
     }
-    .reset-btn:hover { border-color: #64748b; color: #475569; }
+    .reset-btn:hover { background: #e2e8f0; border-color: #94a3b8; color: #334155; }
     /* click-to-edit duration overlay */
     .pom-dur-input-wrap {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -373,13 +375,13 @@
     .pom-dur-label { font-size: .7rem; color: #64748b; margin-bottom: 5px; }
     .pom-dur-input {
       width: 72px; padding: 5px 6px; text-align: center;
-      font-size: 1.5rem; font-weight: 700; color: #0ea5e9;
-      border: 2px solid #0ea5e9; border-radius: 8px; outline: none;
+      font-size: 1.5rem; font-weight: 700; color: var(--accent-color-1);
+      border: 2px solid var(--accent-color-1); border-radius: 8px; outline: none;
     }
     .affirmations-bar {
-      background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px;
-      padding: 6px 10px; font-size: .75rem; color: #0369a1; text-align: center;
-      min-height: 34px; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,.02); border: 1px solid var(--accent-color-1); border-radius: 6px;
+      padding: 6px 10px; font-size: .75rem; color: var(--text-color); text-align: center;
+      min-height: 34px; display: flex; align-items: center; justify-content: center; opacity: .85;
     }
     .affirmation-text { animation: fadeSlide .5s ease; }
     @keyframes fadeSlide { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -411,9 +413,14 @@
     .gear-menu-item {
       background: none; border: none; padding: 8px 12px; text-align: left;
       font-size: .87rem; color: #333; border-radius: 6px; transition: background .15s;
-      white-space: nowrap;
+      white-space: nowrap; width: 100%; display: block; text-decoration: none;
     }
     .gear-menu-item:hover { background: #f5f5f5; }
+    .gear-divider { height: 1px; background: #eee; margin: 4px 0; }
+    .gear-sptools-row { display: flex; align-items: center; gap: 0; }
+    .gear-sptools-link { flex: 1; }
+    .gear-sptools-edit { background: none; border: none; color: #aaa; font-size: .8rem; padding: 8px 6px; border-radius: 6px; cursor: pointer; }
+    .gear-sptools-edit:hover { background: #f5f5f5; color: #555; }
     .gear-btn {
       width: 50px; height: 50px; background: #757575; color: #fff;
       border: none; border-radius: 50%; font-size: 1.4rem;
@@ -440,6 +447,8 @@
 
 <div class="gear-fab" id="gear-fab">
   <div class="gear-menu" id="gear-menu">
+    <div id="gear-sptools-slot"></div>
+    <div class="gear-divider"></div>
     <button class="gear-menu-item" onclick="exportData()">&#11015; Export Data</button>
     <button class="gear-menu-item" onclick="importData()">&#11014; Import Data</button>
   </div>
@@ -736,7 +745,8 @@ function buildTimerRingSVG(pct, secs, mode, size, sw) {
   if (!size) size = 90; if (!sw) sw = 9;
   var r = (size - sw) / 2, circ = 2 * Math.PI * r;
   var offset = circ - (pct / 100) * circ;
-  var color = pct > 15 ? '#0ea5e9' : '#ef4444';
+  var accentCol = cssVar('--accent-color-1', '#0ea5e9');
+  var color = pct > 15 ? accentCol : '#ef4444';
   var textColor = pct > 15 ? '#1e293b' : '#ef4444';
   var mm = String(Math.floor(secs / 60)).padStart(2,'0');
   var ss = String(secs % 60).padStart(2,'0');
@@ -1126,10 +1136,42 @@ function goToCurrentWeek() {
 
 /* Gear menu */
 var gearOpen = false;
+var SPTOOLS_URL_KEY = 'sptools_page_url';
+
+function refreshSPToolsSlot() {
+  var slot = document.getElementById('gear-sptools-slot');
+  if (!slot) return;
+  var url = localStorage.getItem(SPTOOLS_URL_KEY) || '';
+  if (url) {
+    slot.innerHTML =
+      '<div class="gear-sptools-row">' +
+      '<a class="gear-menu-item gear-sptools-link" href="' + esc(url) + '" target="_blank">&#128279; Open SPTools</a>' +
+      '<button class="gear-sptools-edit" onclick="editSPToolsUrl()" title="Change URL">&#9998;</button>' +
+      '</div>';
+  } else {
+    slot.innerHTML =
+      '<button class="gear-menu-item" onclick="editSPToolsUrl()">&#128279; Set SPTools URL&hellip;</button>';
+  }
+}
+
+function editSPToolsUrl() {
+  var current = localStorage.getItem(SPTOOLS_URL_KEY) || '';
+  var newUrl = prompt('SPTools page URL:\n(saved in your browser)', current || 'https://');
+  if (newUrl === null) return;
+  newUrl = newUrl.trim();
+  if (newUrl) {
+    localStorage.setItem(SPTOOLS_URL_KEY, newUrl);
+  } else {
+    localStorage.removeItem(SPTOOLS_URL_KEY);
+  }
+  refreshSPToolsSlot();
+}
+
 function toggleGearMenu() {
   gearOpen = !gearOpen;
   var m = document.getElementById('gear-menu');
   if (m) { if (gearOpen) m.classList.add('open'); else m.classList.remove('open'); }
+  if (gearOpen) refreshSPToolsSlot();
 }
 function closeGear() {
   gearOpen = false;
