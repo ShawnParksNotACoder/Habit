@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mac Refurb Monitor</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:           #161617;
+            --surface:      #1c1c1e;
+            --surface2:     #2c2c2e;
+            --border:       #38383a;
+            --text:         #f5f5f7;
+            --muted:        #86868b;
+            --green:        #30d158;
+            --orange:       #ff9f0a;
+            --red:          #ff453a;
+            --blue:         #0a84ff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2.5rem 1rem 4rem;
+        }
+
+        .container { max-width: 580px; margin: 0 auto; }
+
+        /* ── Header ── */
+        header { text-align: center; margin-bottom: 2.5rem; }
+        .apple-glyph { font-size: 3rem; line-height: 1; display: block; margin-bottom: 0.6rem; }
+        h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; }
+        .subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 0.35rem; }
+
+        /* ── Card ── */
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+        .card-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-weight: 600;
+            margin-bottom: 0.9rem;
+        }
+
+        /* ── Status ── */
+        .status-row { display: flex; align-items: center; gap: 0.75rem; }
+
+        .dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            flex-shrink: 0;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        .dot.watching { background: var(--green); box-shadow: 0 0 7px var(--green); }
+        .dot.checking { background: var(--orange); }
+        .dot.found    { background: var(--green); animation: glow 0.9s infinite; }
+        .dot.error    { background: var(--red); }
+
+        @keyframes glow {
+            0%,100% { box-shadow: 0 0 6px var(--green); }
+            50%      { box-shadow: 0 0 16px var(--green); opacity: 0.6; }
+        }
+
+        #statusText { font-size: 1rem; font-weight: 500; }
+        #lastChecked { margin-left: auto; font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+        #countdown { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 0.6rem; min-height: 1.1em; }
+
+        /* ── Controls ── */
+        .field { margin-bottom: 0.9rem; }
+        .field label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 0.35rem; }
+
+        select, input[type="number"] {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 0.55rem 0.75rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            width: 100%;
+        }
+        select:focus, input:focus { outline: 2px solid var(--blue); outline-offset: -1px; }
+        select:disabled, input:disabled { opacity: 0.4; }
+
+        .btn-row { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
+
+        button {
+            border: none; border-radius: 10px;
+            padding: 0.65rem 1.25rem;
+            font-size: 0.875rem; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        button:active:not(:disabled) { transform: scale(0.97); }
+        button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .btn-start  { background: var(--blue); color: #fff; flex: 1; }
+        .btn-stop   { background: var(--red);  color: #fff; flex: 1; }
+        .btn-now    { background: var(--surface2); color: var(--text); }
+
+        /* ── Listings ── */
+        .empty-state {
+            text-align: center; padding: 1.25rem 0;
+            color: var(--muted); font-size: 0.875rem;
+        }
+
+        .listing {
+            background: var(--surface2);
+            border-radius: 10px;
+            padding: 0.9rem 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .listing:last-child { margin-bottom: 0; }
+        .listing-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .listing-sub   { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.4rem; line-height: 1.4; }
+        .listing-link  { color: var(--blue); font-size: 0.78rem; text-decoration: none; }
+        .listing-link:hover { text-decoration: underline; }
+
+        /* ── Log ── */
+        .log-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.45rem 0;
+            font-size: 0.78rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+        }
+        .log-row:last-child { border-bottom: none; }
+        .log-row.found { color: var(--green); }
+        .log-row.error { color: var(--red); }
+
+        .badge {
+            font-size: 0.68rem; font-weight: 600;
+            padding: 0.15rem 0.55rem; border-radius: 20px;
+            background: var(--surface2); color: var(--muted);
+        }
+        .badge.found { background: rgba(48,209,88,0.15); color: var(--green); }
+        .badge.error { background: rgba(255,69,58,0.15);  color: var(--red); }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <span class="apple-glyph"></span>
+        <h1>Mac Refurb Monitor</h1>
+        <p class="subtitle">Watching Apple US refurb store for Mac Mini &amp; Mac Studio</p>
+    </header>
+
+    <!-- Status -->
+    <div class="card">
+        <div class="card-label">Status</div>
+        <div class="status-row">
+            <div class="dot" id="dot"></div>
+            <span id="statusText">Not started</span>
+            <span id="lastChecked"></span>
+        </div>
+        <div id="countdown"></div>
+    </div>
+
+    <!-- Settings -->
+    <div class="card">
+        <div class="card-label">Settings</div>
+        <div class="field">
+            <label>Check every</label>
+            <select id="intervalSelect">
+                <option value="1">1 minute</option>
+                <option value="5">5 minutes</option>
+                <option value="10" selected>10 minutes</option>
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">1 hour</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Feed URL</label>
+            <input type="text" id="feedUrl"
+                value="https://refurb-tracker.com/feeds/us_in_macstudio_mini.xml?filter=price_min%3D1200">
+        </div>
+        <div class="btn-row">
+            <button class="btn-start" id="toggleBtn" onclick="toggleMonitor()">Start Monitoring</button>
+            <button class="btn-now" id="nowBtn" onclick="checkNow()">Check Now</button>
+        </div>
+    </div>
+
+    <!-- Listings -->
+    <div class="card">
+        <div class="card-label">Current Listings</div>
+        <div id="listings">
+            <div class="empty-state">No data yet — start monitoring or click Check Now</div>
+        </div>
+    </div>
+
+    <!-- Log -->
+    <div class="card">
+        <div class="card-label">Check Log</div>
+        <div id="log">
+            <div class="empty-state">No checks yet</div>
+        </div>
+    </div>
+
+</div>
+<script>
+    // ── State ────────────────────────────────────────────────────────────────
+    let running       = false;
+    let monitorTimer  = null;
+    let countdownTimer= null;
+    let nextAt        = null;
+    let audioCtx      = null;
+    let checkLog      = [];
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function esc(s) {
+        return String(s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function feedUrl() {
+        return document.getElementById('feedUrl').value.trim();
+    }
+
+    function intervalMs() {
+        return parseInt(document.getElementById('intervalSelect').value) * 60_000;
+    }
+
+    // ── Status UI ────────────────────────────────────────────────────────────
+    function setStatus(state, text) {
+        document.getElementById('dot').className = 'dot ' + state;
+        document.getElementById('statusText').textContent = text;
+    }
+
+    function markChecked() {
+        document.getElementById('lastChecked').textContent =
+            'Checked ' + new Date().toLocaleTimeString();
+    }
+
+    function startCountdown() {
+        clearInterval(countdownTimer);
+        nextAt = Date.now() + intervalMs();
+        const el = document.getElementById('countdown');
+        function tick() {
+            const ms = nextAt - Date.now();
+            if (ms <= 0) { el.textContent = ''; return; }
+            const m = Math.floor(ms / 60_000);
+            const s = Math.floor((ms % 60_000) / 1000);
+            el.textContent = `Next check in ${m > 0 ? m + 'm ' : ''}${s}s`;
+        }
+        tick();
+        countdownTimer = setInterval(tick, 1000);
+    }
+
+    function stopCountdown() {
+        clearInterval(countdownTimer);
+        document.getElementById('countdown').textContent = '';
+    }
+
+    // ── Fetch ────────────────────────────────────────────────────────────────
+    async function fetchXml() {
+        const url = feedUrl();
+
+        // Try direct fetch first
+        try {
+            const r = await fetch(url, { mode: 'cors' });
+            if (r.ok) return await r.text();
+        } catch (_) { /* fall through to proxy */ }
+
+        // CORS proxy fallback
+        const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+        const r = await fetch(proxy);
+        if (!r.ok) throw new Error(`Proxy returned HTTP ${r.status}`);
+        const json = await r.json();
+        return json.contents;
+    }
+
+    function parseEntries(xml) {
+        const doc = new DOMParser().parseFromString(xml, 'application/xml');
+        if (doc.querySelector('parsererror')) throw new Error('XML parse error');
+
+        return Array.from(doc.querySelectorAll('entry')).map(e => {
+            const linkEl = e.querySelector('link');
+            return {
+                title:   e.querySelector('title')?.textContent?.trim()            || 'Unknown',
+                href:    linkEl?.getAttribute('href') || linkEl?.textContent?.trim() || null,
+                summary: e.querySelector('summary, content')?.textContent?.trim() || '',
+                updated: e.querySelector('updated')?.textContent                  || '',
+            };
+        });
+    }
+
+    // ── Render ───────────────────────────────────────────────────────────────
+    function renderListings(entries) {
+        const el = document.getElementById('listings');
+        if (!entries.length) {
+            el.innerHTML = '<div class="empty-state">No listings right now</div>';
+            return;
+        }
+        el.innerHTML = entries.map(e => `
+            <div class="listing">
+                <div class="listing-title">${esc(e.title)}</div>
+                ${e.summary ? `<div class="listing-sub">${esc(e.summary)}</div>` : ''}
+                ${e.href    ? `<a class="listing-link" href="${esc(e.href)}" target="_blank">View on Apple Store →</a>` : ''}
+            </div>
+        `).join('');
+    }
+
+    function addLog(type, count) {
+        checkLog.unshift({ type, count, time: new Date().toLocaleTimeString() });
+        if (checkLog.length > 30) checkLog.pop();
+
+        document.getElementById('log').innerHTML = checkLog.map(l => `
+            <div class="log-row ${l.type}">
+                <span>${l.time}</span>
+                <span class="badge ${l.type}">
+                    ${l.type === 'found' ? `${l.count} listing${l.count !== 1 ? 's' : ''} found`
+                    : l.type === 'error' ? 'Error'
+                    : 'No listings'}
+                </span>
+            </div>
+        `).join('');
+    }
+
+    // ── Sound ────────────────────────────────────────────────────────────────
+    function playChime() {
+        try {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            // Ascending C-major arpeggio: C5 E5 G5 C6
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                const osc  = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+
+                const t = audioCtx.currentTime + i * 0.22;
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.45, t + 0.04);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+
+                osc.start(t);
+                osc.stop(t + 0.9);
+            });
+        } catch (e) {
+            console.warn('Audio error:', e);
+        }
+    }
+
+    // ── Browser notification ──────────────────────────────────────────────────
+    function notify(count) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        new Notification('Mac Refurb Monitor', {
+            body: `${count} listing${count !== 1 ? 's' : ''} found on Apple refurb store!`,
+        });
+    }
+
+    // ── Core check ───────────────────────────────────────────────────────────
+    async function doCheck() {
+        setStatus('checking', 'Checking…');
+        try {
+            const xml     = await fetchXml();
+            const entries = parseEntries(xml);
+            markChecked();
+            renderListings(entries);
+
+            if (entries.length > 0) {
+                setStatus('found', `${entries.length} listing${entries.length !== 1 ? 's' : ''} found!`);
+                addLog('found', entries.length);
+                playChime();
+                notify(entries.length);
+            } else {
+                setStatus(running ? 'watching' : '', running ? 'Watching…' : 'No listings found');
+                addLog('empty', 0);
+            }
+        } catch (err) {
+            markChecked();
+            setStatus('error', 'Error: ' + err.message);
+            addLog('error', 0);
+        }
+    }
+
+    // ── Monitor control ───────────────────────────────────────────────────────
+    function toggleMonitor() {
+        if (running) {
+            stopMonitor();
+        } else {
+            startMonitor();
+        }
+    }
+
+    function startMonitor() {
+        running = true;
+
+        // Create AudioContext on user gesture so autoplay policy is satisfied
+        if (!audioCtx) audioCtx = new AudioContext();
+
+        document.getElementById('toggleBtn').textContent = 'Stop Monitoring';
+        document.getElementById('toggleBtn').className   = 'btn-stop';
+        document.getElementById('intervalSelect').disabled = true;
+
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        doCheck().then(() => {
+            if (!running) return;
+            if (document.getElementById('dot').className.includes('found')) return;
+            setStatus('watching', 'Watching…');
+        });
+
+        scheduleNext();
+    }
+
+    function stopMonitor() {
+        running = false;
+        clearTimeout(monitorTimer);
+        stopCountdown();
+
+        document.getElementById('toggleBtn').textContent = 'Start Monitoring';
+        document.getElementById('toggleBtn').className   = 'btn-start';
+        document.getElementById('intervalSelect').disabled = false;
+
+        const dot = document.getElementById('dot');
+        if (!dot.className.includes('found') && !dot.className.includes('error')) {
+            setStatus('', 'Stopped');
+        }
+    }
+
+    function scheduleNext() {
+        clearTimeout(monitorTimer);
+        startCountdown();
+        monitorTimer = setTimeout(async () => {
+            if (!running) return;
+            await doCheck();
+            if (running) {
+                if (!document.getElementById('dot').className.includes('found')) {
+                    setStatus('watching', 'Watching…');
+                }
+                scheduleNext();
+            }
+        }, intervalMs());
+    }
+
+    async function checkNow() {
+        const btn = document.getElementById('nowBtn');
+        btn.disabled = true;
+
+        if (running) {
+            clearTimeout(monitorTimer);
+            stopCountdown();
+        }
+
+        await doCheck();
+
+        if (running) {
+            if (!document.getElementById('dot').className.includes('found')) {
+                setStatus('watching', 'Watching…');
+            }
+            scheduleNext();
+        }
+
+        btn.disabled = false;
+    }
+</script>
+</body>
+</html>
