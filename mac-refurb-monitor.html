@@ -8,16 +8,16 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg:           #161617;
-            --surface:      #1c1c1e;
-            --surface2:     #2c2c2e;
-            --border:       #38383a;
-            --text:         #f5f5f7;
-            --muted:        #86868b;
-            --green:        #30d158;
-            --orange:       #ff9f0a;
-            --red:          #ff453a;
-            --blue:         #0a84ff;
+            --bg:      #161617;
+            --surface: #1c1c1e;
+            --surf2:   #2c2c2e;
+            --border:  #38383a;
+            --text:    #f5f5f7;
+            --muted:   #86868b;
+            --green:   #30d158;
+            --orange:  #ff9f0a;
+            --red:     #ff453a;
+            --blue:    #0a84ff;
         }
 
         body {
@@ -28,7 +28,7 @@
             padding: 2.5rem 1rem 4rem;
         }
 
-        .container { max-width: 580px; margin: 0 auto; }
+        .container { max-width: 620px; margin: 0 auto; }
 
         /* ── Header ── */
         header { text-align: center; margin-bottom: 2.5rem; }
@@ -55,12 +55,9 @@
 
         /* ── Status ── */
         .status-row { display: flex; align-items: center; gap: 0.75rem; }
-
         .dot {
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            background: var(--border);
-            flex-shrink: 0;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--border); flex-shrink: 0;
             transition: background 0.3s, box-shadow 0.3s;
         }
         .dot.watching { background: var(--green); box-shadow: 0 0 7px var(--green); }
@@ -73,16 +70,17 @@
             50%      { box-shadow: 0 0 16px var(--green); opacity: 0.6; }
         }
 
-        #statusText { font-size: 1rem; font-weight: 500; }
+        #statusText  { font-size: 1rem; font-weight: 500; }
         #lastChecked { margin-left: auto; font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
-        #countdown { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 0.6rem; min-height: 1.1em; }
+        #countdown   { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 0.6rem; min-height: 1.1em; }
 
-        /* ── Controls ── */
-        .field { margin-bottom: 0.9rem; }
-        .field label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 0.35rem; }
+        /* ── Form fields ── */
+        .field { margin-bottom: 0.85rem; }
+        .field > label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
+        .opt { font-size: 0.72rem; color: var(--muted); }
 
-        select, input[type="number"] {
-            background: var(--surface2);
+        select, input[type="number"], input[type="text"], input[type="search"] {
+            background: var(--surf2);
             border: 1px solid var(--border);
             color: var(--text);
             border-radius: 8px;
@@ -92,10 +90,54 @@
             width: 100%;
         }
         select:focus, input:focus { outline: 2px solid var(--blue); outline-offset: -1px; }
-        select:disabled, input:disabled { opacity: 0.4; }
 
-        .btn-row { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
+        /* ── Products grid ── */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.05rem 0;
+            margin-top: 0.3rem;
+        }
+        .check-label {
+            display: flex; align-items: center; gap: 0.45rem;
+            font-size: 0.82rem; cursor: pointer;
+            padding: 0.3rem 0.35rem; border-radius: 6px;
+            transition: background 0.1s;
+            user-select: none;
+        }
+        .check-label:hover { background: var(--surf2); }
+        .check-label input[type="checkbox"] {
+            accent-color: var(--blue);
+            width: 14px; height: 14px;
+            cursor: pointer; flex-shrink: 0;
+        }
+        .no-warn { font-size: 0.78rem; color: var(--orange); margin-top: 0.4rem; display: none; }
 
+        /* disabled state for builder */
+        .builder-disabled { opacity: 0.4; pointer-events: none; }
+
+        /* ── Price row ── */
+        .price-row { display: flex; gap: 0.5rem; align-items: center; }
+        .price-row input { flex: 1; }
+        .price-sep { color: var(--muted); white-space: nowrap; font-size: 0.85rem; }
+
+        /* ── URL display ── */
+        .url-row { display: flex; gap: 0.4rem; align-items: stretch; margin-top: 0.85rem; }
+        .url-row input {
+            flex: 1; font-size: 0.7rem; font-family: monospace;
+            color: var(--muted); cursor: default; padding: 0.45rem 0.6rem;
+        }
+        .btn-copy {
+            border: 1px solid var(--border); border-radius: 8px;
+            background: var(--surf2); color: var(--muted);
+            padding: 0 0.8rem; font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; white-space: nowrap;
+            transition: color 0.15s;
+        }
+        .btn-copy:hover { color: var(--text); }
+
+        /* ── Buttons ── */
+        .btn-row { display: flex; gap: 0.5rem; margin-top: 1rem; }
         button {
             border: none; border-radius: 10px;
             padding: 0.65rem 1.25rem;
@@ -105,22 +147,18 @@
         }
         button:active:not(:disabled) { transform: scale(0.97); }
         button:disabled { opacity: 0.35; cursor: not-allowed; }
-
-        .btn-start  { background: var(--blue); color: #fff; flex: 1; }
-        .btn-stop   { background: var(--red);  color: #fff; flex: 1; }
-        .btn-now    { background: var(--surface2); color: var(--text); }
+        .btn-start { background: var(--blue); color: #fff; flex: 1; }
+        .btn-stop  { background: var(--red);  color: #fff; flex: 1; }
+        .btn-now   { background: var(--surf2); color: var(--text); }
 
         /* ── Listings ── */
         .empty-state {
             text-align: center; padding: 1.25rem 0;
             color: var(--muted); font-size: 0.875rem;
         }
-
         .listing {
-            background: var(--surface2);
-            border-radius: 10px;
-            padding: 0.9rem 1rem;
-            margin-bottom: 0.5rem;
+            background: var(--surf2); border-radius: 10px;
+            padding: 0.9rem 1rem; margin-bottom: 0.5rem;
         }
         .listing:last-child { margin-bottom: 0; }
         .listing-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.2rem; }
@@ -131,10 +169,8 @@
         /* ── Log ── */
         .log-row {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0.45rem 0;
-            font-size: 0.78rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--muted);
+            padding: 0.45rem 0; font-size: 0.78rem;
+            border-bottom: 1px solid var(--border); color: var(--muted);
         }
         .log-row:last-child { border-bottom: none; }
         .log-row.found { color: var(--green); }
@@ -143,10 +179,47 @@
         .badge {
             font-size: 0.68rem; font-weight: 600;
             padding: 0.15rem 0.55rem; border-radius: 20px;
-            background: var(--surface2); color: var(--muted);
+            background: var(--surf2); color: var(--muted);
         }
         .badge.found { background: rgba(48,209,88,0.15); color: var(--green); }
-        .badge.error { background: rgba(255,69,58,0.15);  color: var(--red); }
+        .badge.err-badge {
+            background: rgba(255,69,58,0.15); color: var(--red);
+            cursor: pointer; border: none; font-family: inherit;
+        }
+        .badge.err-badge:hover { background: rgba(255,69,58,0.28); }
+
+        /* ── Error popup ── */
+        #errPopup {
+            position: fixed;
+            visibility: hidden;
+            display: block;
+            z-index: 300;
+            background: #1c1c1e;
+            border: 1px solid var(--red);
+            border-radius: 12px;
+            padding: 0.85rem 2rem 0.85rem 1rem;
+            max-width: 360px;
+            min-width: 200px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+            pointer-events: none;
+        }
+        #errPopup.visible { visibility: visible; pointer-events: auto; }
+        #errPopup .pop-title {
+            font-size: 0.7rem; font-weight: 700; color: var(--red);
+            text-transform: uppercase; letter-spacing: 0.07em;
+            margin-bottom: 0.45rem;
+        }
+        #errPopup .pop-msg {
+            font-size: 0.78rem; color: var(--text); font-family: monospace;
+            word-break: break-word; line-height: 1.55; white-space: pre-wrap;
+        }
+        #errPopup .pop-x {
+            position: absolute; top: 0.45rem; right: 0.5rem;
+            background: none; border: none; color: var(--muted);
+            font-size: 0.9rem; cursor: pointer; padding: 0.2rem 0.4rem;
+            border-radius: 4px; line-height: 1;
+        }
+        #errPopup .pop-x:hover { color: var(--text); background: var(--surf2); }
     </style>
 </head>
 <body>
@@ -155,7 +228,7 @@
     <header>
         <span class="apple-glyph"></span>
         <h1>Mac Refurb Monitor</h1>
-        <p class="subtitle">Watching Apple US refurb store for Mac Mini &amp; Mac Studio</p>
+        <p class="subtitle">Watching Apple refurb store for Mac listings</p>
     </header>
 
     <!-- Status -->
@@ -169,9 +242,44 @@
         <div id="countdown"></div>
     </div>
 
-    <!-- Settings -->
+    <!-- Feed builder -->
+    <div class="card" id="builderCard">
+        <div class="card-label">Feed</div>
+
+        <div class="field">
+            <label>Country</label>
+            <select id="countrySelect" onchange="updateUrl()"></select>
+        </div>
+
+        <div class="field">
+            <label>Products</label>
+            <div class="products-grid" id="productsGrid"></div>
+            <div class="no-warn" id="noWarn">⚠ Select at least one product</div>
+        </div>
+
+        <div class="field">
+            <label>Keywords <span class="opt">(optional)</span></label>
+            <input type="search" id="filterKw" placeholder="e.g. M4 Pro 24GB" oninput="updateUrl()">
+        </div>
+
+        <div class="field">
+            <label>Price range <span class="opt">(optional)</span></label>
+            <div class="price-row">
+                <input type="number" id="filterMin" placeholder="min $" min="0" step="1" oninput="updateUrl()" value="1200">
+                <span class="price-sep">—</span>
+                <input type="number" id="filterMax" placeholder="max $" min="0" step="1" oninput="updateUrl()">
+            </div>
+        </div>
+
+        <div class="url-row">
+            <input type="text" id="feedUrlDisplay" readonly>
+            <button class="btn-copy" id="copyBtn" onclick="copyUrl()">Copy</button>
+        </div>
+    </div>
+
+    <!-- Monitor controls -->
     <div class="card">
-        <div class="card-label">Settings</div>
+        <div class="card-label">Monitor</div>
         <div class="field">
             <label>Check every</label>
             <select id="intervalSelect">
@@ -183,14 +291,9 @@
                 <option value="60">1 hour</option>
             </select>
         </div>
-        <div class="field">
-            <label>Feed URL</label>
-            <input type="text" id="feedUrl"
-                value="https://refurb-tracker.com/feeds/us_in_macstudio_mini.xml?filter=price_min%3D1200">
-        </div>
         <div class="btn-row">
             <button class="btn-start" id="toggleBtn" onclick="toggleMonitor()">Start Monitoring</button>
-            <button class="btn-now" id="nowBtn" onclick="checkNow()">Check Now</button>
+            <button class="btn-now"   id="nowBtn"    onclick="checkNow()">Check Now</button>
         </div>
     </div>
 
@@ -211,270 +314,380 @@
     </div>
 
 </div>
+
+<!-- Error detail popup -->
+<div id="errPopup">
+    <button class="pop-x" onclick="closePopup()">✕</button>
+    <div class="pop-title">Error Details</div>
+    <div class="pop-msg" id="popMsg"></div>
+</div>
+
 <script>
-    // ── State ────────────────────────────────────────────────────────────────
-    let running       = false;
-    let monitorTimer  = null;
-    let countdownTimer= null;
-    let nextAt        = null;
-    let audioCtx      = null;
-    let checkLog      = [];
+// ── Static data ───────────────────────────────────────────────────────────────
+const COUNTRIES = [
+    {v:'us',l:'United States'}, {v:'uk',l:'United Kingdom'}, {v:'au',l:'Australia'},
+    {v:'ca',l:'Canada (EN)'},   {v:'xf',l:'Canada (FR)'},    {v:'fr',l:'France'},
+    {v:'de',l:'Deutschland'},   {v:'es',l:'España'},          {v:'it',l:'Italia'},
+    {v:'jp',l:'Japan'},         {v:'nl',l:'Nederland'},       {v:'nz',l:'New Zealand'},
+    {v:'sg',l:'Singapore'},     {v:'kr',l:'South Korea'},     {v:'ch',l:'Switzerland'},
+    {v:'tw',l:'Taiwan'},        {v:'cn',l:'China'},           {v:'hk',l:'Hong Kong (EN)'},
+    {v:'hz',l:'Hong Kong (ZH)'},{v:'ie',l:'Ireland'},         {v:'at',l:'Österreich'},
+    {v:'pl',l:'Polska'},        {v:'bx',l:'België'},          {v:'be',l:'Belgique'},
+    {v:'cx',l:'Schweiz'},
+];
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
-    function esc(s) {
-        return String(s)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const PRODUCTS = [
+    {v:'mini',      l:'Mac Mini',    on:true },
+    {v:'macstudio', l:'Mac Studio',  on:true },
+    {v:'macbookpro',l:'MacBook Pro', on:false},
+    {v:'macbookair',l:'MacBook Air', on:false},
+    {v:'imac',      l:'iMac',        on:false},
+    {v:'macpro',    l:'Mac Pro',     on:false},
+    {v:'ipad',      l:'iPad',        on:false},
+    {v:'iphone',    l:'iPhone',      on:false},
+    {v:'homepod',   l:'HomePod',     on:false},
+    {v:'atv',       l:'Apple TV',    on:false},
+    {v:'watch',     l:'Apple Watch', on:false},
+    {v:'disp',      l:'Displays',    on:false},
+    {v:'acc',       l:'Accessories', on:false},
+];
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function() {
+    const cs = document.getElementById('countrySelect');
+    COUNTRIES.forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.v; o.textContent = c.l;
+        if (c.v === 'us') o.selected = true;
+        cs.appendChild(o);
+    });
+
+    const grid = document.getElementById('productsGrid');
+    PRODUCTS.forEach(p => {
+        const lbl = document.createElement('label');
+        lbl.className = 'check-label';
+        const chk = document.createElement('input');
+        chk.type = 'checkbox'; chk.className = 'product-check';
+        chk.value = p.v; chk.checked = p.on;
+        chk.addEventListener('change', updateUrl);
+        lbl.appendChild(chk);
+        lbl.appendChild(document.createTextNode(' ' + p.l));
+        grid.appendChild(lbl);
+    });
+
+    updateUrl();
+})();
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let running       = false;
+let monitorTimer  = null;
+let countdownTimer= null;
+let audioCtx      = null;
+let checkLog      = [];
+
+// ── URL builder ───────────────────────────────────────────────────────────────
+function buildFeedUrl() {
+    const country  = document.getElementById('countrySelect').value;
+    const selected = Array.from(document.querySelectorAll('.product-check:checked')).map(c => c.value);
+    if (!selected.length) return '';
+
+    const base = `https://refurb-tracker.com/feeds/${country}_in_${selected.join('_')}.xml`;
+    const parts = [];
+    const kw  = document.getElementById('filterKw').value.trim();
+    const min = document.getElementById('filterMin').value.trim();
+    const max = document.getElementById('filterMax').value.trim();
+    if (kw)  parts.push(kw);
+    if (min) parts.push(`price_min=${min}`);
+    if (max) parts.push(`price_max=${max}`);
+
+    return parts.length ? `${base}?filter=${encodeURIComponent(parts.join(' '))}` : base;
+}
+
+function updateUrl() {
+    const url = buildFeedUrl();
+    document.getElementById('noWarn').style.display = url ? 'none' : 'block';
+    document.getElementById('feedUrlDisplay').value = url || '(select at least one product)';
+    if (!running) {
+        document.getElementById('toggleBtn').disabled = !url;
+        document.getElementById('nowBtn').disabled    = !url;
+    }
+}
+
+function copyUrl() {
+    const url = buildFeedUrl();
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+    });
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) {
+    return String(s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function intervalMs() {
+    return parseInt(document.getElementById('intervalSelect').value) * 60_000;
+}
+
+function setBuilderEnabled(enabled) {
+    const card = document.getElementById('builderCard');
+    card.classList.toggle('builder-disabled', !enabled);
+    document.getElementById('countrySelect').disabled = !enabled;
+    document.getElementById('filterKw').disabled      = !enabled;
+    document.getElementById('filterMin').disabled     = !enabled;
+    document.getElementById('filterMax').disabled     = !enabled;
+    document.querySelectorAll('.product-check').forEach(el => el.disabled = !enabled);
+    document.getElementById('intervalSelect').disabled = !enabled;
+}
+
+// ── Status ────────────────────────────────────────────────────────────────────
+function setStatus(state, text) {
+    document.getElementById('dot').className = 'dot ' + state;
+    document.getElementById('statusText').textContent = text;
+}
+
+function markChecked() {
+    document.getElementById('lastChecked').textContent = 'Checked ' + new Date().toLocaleTimeString();
+}
+
+function startCountdown() {
+    clearInterval(countdownTimer);
+    const nextAt = Date.now() + intervalMs();
+    const el = document.getElementById('countdown');
+    function tick() {
+        const r = nextAt - Date.now();
+        if (r <= 0) { el.textContent = ''; return; }
+        const m = Math.floor(r / 60_000), s = Math.floor((r % 60_000) / 1000);
+        el.textContent = `Next check in ${m > 0 ? m + 'm ' : ''}${s}s`;
+    }
+    tick();
+    countdownTimer = setInterval(tick, 1000);
+}
+
+function stopCountdown() {
+    clearInterval(countdownTimer);
+    document.getElementById('countdown').textContent = '';
+}
+
+// ── Fetch ─────────────────────────────────────────────────────────────────────
+async function fetchXml() {
+    const url = buildFeedUrl();
+    if (!url) throw new Error('No products selected');
+
+    let directErr = null;
+
+    try {
+        const r = await fetch(url, { mode: 'cors' });
+        if (r.ok) return await r.text();
+        directErr = `Direct fetch: HTTP ${r.status} ${r.statusText || ''}`.trim();
+    } catch (e) {
+        directErr = `Direct fetch: ${e.message}`;
     }
 
-    function feedUrl() {
-        return document.getElementById('feedUrl').value.trim();
-    }
-
-    function intervalMs() {
-        return parseInt(document.getElementById('intervalSelect').value) * 60_000;
-    }
-
-    // ── Status UI ────────────────────────────────────────────────────────────
-    function setStatus(state, text) {
-        document.getElementById('dot').className = 'dot ' + state;
-        document.getElementById('statusText').textContent = text;
-    }
-
-    function markChecked() {
-        document.getElementById('lastChecked').textContent =
-            'Checked ' + new Date().toLocaleTimeString();
-    }
-
-    function startCountdown() {
-        clearInterval(countdownTimer);
-        nextAt = Date.now() + intervalMs();
-        const el = document.getElementById('countdown');
-        function tick() {
-            const ms = nextAt - Date.now();
-            if (ms <= 0) { el.textContent = ''; return; }
-            const m = Math.floor(ms / 60_000);
-            const s = Math.floor((ms % 60_000) / 1000);
-            el.textContent = `Next check in ${m > 0 ? m + 'm ' : ''}${s}s`;
-        }
-        tick();
-        countdownTimer = setInterval(tick, 1000);
-    }
-
-    function stopCountdown() {
-        clearInterval(countdownTimer);
-        document.getElementById('countdown').textContent = '';
-    }
-
-    // ── Fetch ────────────────────────────────────────────────────────────────
-    async function fetchXml() {
-        const url = feedUrl();
-
-        // Try direct fetch first
-        try {
-            const r = await fetch(url, { mode: 'cors' });
-            if (r.ok) return await r.text();
-        } catch (_) { /* fall through to proxy */ }
-
-        // CORS proxy fallback
+    try {
         const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
         const r = await fetch(proxy);
-        if (!r.ok) throw new Error(`Proxy returned HTTP ${r.status}`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const json = await r.json();
+        if (!json.contents) throw new Error('Empty response from proxy');
         return json.contents;
+    } catch (e) {
+        throw new Error(`${directErr}\nProxy fallback: ${e.message}`);
     }
+}
 
-    function parseEntries(xml) {
-        const doc = new DOMParser().parseFromString(xml, 'application/xml');
-        if (doc.querySelector('parsererror')) throw new Error('XML parse error');
+function parseEntries(xml) {
+    const doc = new DOMParser().parseFromString(xml, 'application/xml');
+    if (doc.querySelector('parsererror'))
+        throw new Error('XML parse error — server may have returned an error page instead of a feed');
+    return Array.from(doc.querySelectorAll('entry')).map(e => {
+        const lnk = e.querySelector('link');
+        return {
+            title:   e.querySelector('title')?.textContent?.trim()             || 'Unknown',
+            href:    lnk?.getAttribute('href') || lnk?.textContent?.trim()     || null,
+            summary: e.querySelector('summary, content')?.textContent?.trim()  || '',
+        };
+    });
+}
 
-        return Array.from(doc.querySelectorAll('entry')).map(e => {
-            const linkEl = e.querySelector('link');
-            return {
-                title:   e.querySelector('title')?.textContent?.trim()            || 'Unknown',
-                href:    linkEl?.getAttribute('href') || linkEl?.textContent?.trim() || null,
-                summary: e.querySelector('summary, content')?.textContent?.trim() || '',
-                updated: e.querySelector('updated')?.textContent                  || '',
-            };
-        });
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderListings(entries) {
+    const el = document.getElementById('listings');
+    if (!entries.length) {
+        el.innerHTML = '<div class="empty-state">No listings right now</div>';
+        return;
     }
+    el.innerHTML = entries.map(e => `
+        <div class="listing">
+            <div class="listing-title">${esc(e.title)}</div>
+            ${e.summary ? `<div class="listing-sub">${esc(e.summary)}</div>` : ''}
+            ${e.href ? `<a class="listing-link" href="${esc(e.href)}" target="_blank" rel="noopener">View on Apple Store →</a>` : ''}
+        </div>`).join('');
+}
 
-    // ── Render ───────────────────────────────────────────────────────────────
-    function renderListings(entries) {
-        const el = document.getElementById('listings');
-        if (!entries.length) {
-            el.innerHTML = '<div class="empty-state">No listings right now</div>';
-            return;
-        }
-        el.innerHTML = entries.map(e => `
-            <div class="listing">
-                <div class="listing-title">${esc(e.title)}</div>
-                ${e.summary ? `<div class="listing-sub">${esc(e.summary)}</div>` : ''}
-                ${e.href    ? `<a class="listing-link" href="${esc(e.href)}" target="_blank">View on Apple Store →</a>` : ''}
-            </div>
-        `).join('');
-    }
+function addLog(type, count, errMsg) {
+    checkLog.unshift({ type, count, err: errMsg || null, time: new Date().toLocaleTimeString() });
+    if (checkLog.length > 30) checkLog.pop();
 
-    function addLog(type, count) {
-        checkLog.unshift({ type, count, time: new Date().toLocaleTimeString() });
-        if (checkLog.length > 30) checkLog.pop();
+    document.getElementById('log').innerHTML = checkLog.map(l => `
+        <div class="log-row ${l.type}">
+            <span>${l.time}</span>
+            ${l.type === 'found'
+                ? `<span class="badge found">${l.count} listing${l.count !== 1 ? 's' : ''} found</span>`
+            : l.type === 'error'
+                ? `<button class="badge err-badge" data-err="${esc(l.err || 'Unknown error')}"
+                          onclick="showPopup(this,event)">Error ›</button>`
+            : `<span class="badge">No listings</span>`}
+        </div>`).join('');
+}
 
-        document.getElementById('log').innerHTML = checkLog.map(l => `
-            <div class="log-row ${l.type}">
-                <span>${l.time}</span>
-                <span class="badge ${l.type}">
-                    ${l.type === 'found' ? `${l.count} listing${l.count !== 1 ? 's' : ''} found`
-                    : l.type === 'error' ? 'Error'
-                    : 'No listings'}
-                </span>
-            </div>
-        `).join('');
-    }
+// ── Error popup ───────────────────────────────────────────────────────────────
+function showPopup(el, event) {
+    event.stopPropagation();
+    const popup = document.getElementById('errPopup');
+    document.getElementById('popMsg').textContent = el.dataset.err;
 
-    // ── Sound ────────────────────────────────────────────────────────────────
-    function playChime() {
-        try {
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+    // measure off-screen then position
+    popup.style.left = '-9999px';
+    popup.style.top  = '-9999px';
+    popup.classList.add('visible');
 
-            // Ascending C-major arpeggio: C5 E5 G5 C6
-            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-                const osc  = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
+    requestAnimationFrame(() => {
+        const pw = popup.offsetWidth, ph = popup.offsetHeight;
+        let x = event.clientX - pw / 2;
+        let y = event.clientY - ph - 12;
+        x = Math.max(8, Math.min(x, window.innerWidth  - pw - 8));
+        if (y < 8) y = event.clientY + 18;
+        popup.style.left = x + 'px';
+        popup.style.top  = y + 'px';
+    });
+}
 
-                osc.type = 'sine';
-                osc.frequency.value = freq;
+function closePopup() {
+    document.getElementById('errPopup').classList.remove('visible');
+}
 
-                const t = audioCtx.currentTime + i * 0.22;
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.45, t + 0.04);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+document.addEventListener('click', e => {
+    const p = document.getElementById('errPopup');
+    if (p.classList.contains('visible') && !p.contains(e.target)) closePopup();
+});
 
-                osc.start(t);
-                osc.stop(t + 0.9);
-            });
-        } catch (e) {
-            console.warn('Audio error:', e);
-        }
-    }
-
-    // ── Browser notification ──────────────────────────────────────────────────
-    function notify(count) {
-        if (!('Notification' in window) || Notification.permission !== 'granted') return;
-        new Notification('Mac Refurb Monitor', {
-            body: `${count} listing${count !== 1 ? 's' : ''} found on Apple refurb store!`,
-        });
-    }
-
-    // ── Core check ───────────────────────────────────────────────────────────
-    async function doCheck() {
-        setStatus('checking', 'Checking…');
-        try {
-            const xml     = await fetchXml();
-            const entries = parseEntries(xml);
-            markChecked();
-            renderListings(entries);
-
-            if (entries.length > 0) {
-                setStatus('found', `${entries.length} listing${entries.length !== 1 ? 's' : ''} found!`);
-                addLog('found', entries.length);
-                playChime();
-                notify(entries.length);
-            } else {
-                setStatus(running ? 'watching' : '', running ? 'Watching…' : 'No listings found');
-                addLog('empty', 0);
-            }
-        } catch (err) {
-            markChecked();
-            setStatus('error', 'Error: ' + err.message);
-            addLog('error', 0);
-        }
-    }
-
-    // ── Monitor control ───────────────────────────────────────────────────────
-    function toggleMonitor() {
-        if (running) {
-            stopMonitor();
-        } else {
-            startMonitor();
-        }
-    }
-
-    function startMonitor() {
-        running = true;
-
-        // Create AudioContext on user gesture so autoplay policy is satisfied
+// ── Sound ─────────────────────────────────────────────────────────────────────
+function playChime() {
+    try {
         if (!audioCtx) audioCtx = new AudioContext();
-
-        document.getElementById('toggleBtn').textContent = 'Stop Monitoring';
-        document.getElementById('toggleBtn').className   = 'btn-stop';
-        document.getElementById('intervalSelect').disabled = true;
-
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-
-        doCheck().then(() => {
-            if (!running) return;
-            if (document.getElementById('dot').className.includes('found')) return;
-            setStatus('watching', 'Watching…');
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'sine'; osc.frequency.value = freq;
+            const t = audioCtx.currentTime + i * 0.22;
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.45, t + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+            osc.start(t); osc.stop(t + 0.9);
         });
+    } catch (e) { console.warn('Audio:', e); }
+}
 
-        scheduleNext();
-    }
+function notify(count) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    new Notification('Mac Refurb Monitor', {
+        body: `${count} listing${count !== 1 ? 's' : ''} found on Apple refurb store!`,
+    });
+}
 
-    function stopMonitor() {
-        running = false;
-        clearTimeout(monitorTimer);
-        stopCountdown();
-
-        document.getElementById('toggleBtn').textContent = 'Start Monitoring';
-        document.getElementById('toggleBtn').className   = 'btn-start';
-        document.getElementById('intervalSelect').disabled = false;
-
-        const dot = document.getElementById('dot');
-        if (!dot.className.includes('found') && !dot.className.includes('error')) {
-            setStatus('', 'Stopped');
+// ── Core check ────────────────────────────────────────────────────────────────
+async function doCheck() {
+    setStatus('checking', 'Checking…');
+    try {
+        const xml     = await fetchXml();
+        const entries = parseEntries(xml);
+        markChecked();
+        renderListings(entries);
+        if (entries.length > 0) {
+            setStatus('found', `${entries.length} listing${entries.length !== 1 ? 's' : ''} found!`);
+            addLog('found', entries.length);
+            playChime();
+            notify(entries.length);
+        } else {
+            setStatus(running ? 'watching' : '', running ? 'Watching…' : 'No listings found');
+            addLog('empty', 0);
         }
+    } catch (err) {
+        markChecked();
+        setStatus('error', 'Check failed — click Error in log for details');
+        addLog('error', 0, err.message);
+    }
+}
+
+// ── Monitor control ───────────────────────────────────────────────────────────
+function toggleMonitor() { running ? stopMonitor() : startMonitor(); }
+
+function startMonitor() {
+    running = true;
+    if (!audioCtx) audioCtx = new AudioContext();
+
+    document.getElementById('toggleBtn').textContent = 'Stop Monitoring';
+    document.getElementById('toggleBtn').className   = 'btn-stop';
+    setBuilderEnabled(false);
+
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
     }
 
-    function scheduleNext() {
-        clearTimeout(monitorTimer);
-        startCountdown();
-        monitorTimer = setTimeout(async () => {
-            if (!running) return;
-            await doCheck();
-            if (running) {
-                if (!document.getElementById('dot').className.includes('found')) {
-                    setStatus('watching', 'Watching…');
-                }
-                scheduleNext();
-            }
-        }, intervalMs());
-    }
+    doCheck().then(() => {
+        if (running && !document.getElementById('dot').className.includes('found'))
+            setStatus('watching', 'Watching…');
+    });
+    scheduleNext();
+}
 
-    async function checkNow() {
-        const btn = document.getElementById('nowBtn');
-        btn.disabled = true;
+function stopMonitor() {
+    running = false;
+    clearTimeout(monitorTimer);
+    stopCountdown();
 
-        if (running) {
-            clearTimeout(monitorTimer);
-            stopCountdown();
-        }
+    document.getElementById('toggleBtn').textContent = 'Start Monitoring';
+    document.getElementById('toggleBtn').className   = 'btn-start';
+    setBuilderEnabled(true);
 
+    const dot = document.getElementById('dot');
+    if (!dot.className.includes('found') && !dot.className.includes('error'))
+        setStatus('', 'Stopped');
+}
+
+function scheduleNext() {
+    clearTimeout(monitorTimer);
+    startCountdown();
+    monitorTimer = setTimeout(async () => {
+        if (!running) return;
         await doCheck();
-
         if (running) {
-            if (!document.getElementById('dot').className.includes('found')) {
+            if (!document.getElementById('dot').className.includes('found'))
                 setStatus('watching', 'Watching…');
-            }
             scheduleNext();
         }
+    }, intervalMs());
+}
 
-        btn.disabled = false;
+async function checkNow() {
+    const btn = document.getElementById('nowBtn');
+    btn.disabled = true;
+    if (running) { clearTimeout(monitorTimer); stopCountdown(); }
+    await doCheck();
+    if (running) {
+        if (!document.getElementById('dot').className.includes('found'))
+            setStatus('watching', 'Watching…');
+        scheduleNext();
     }
+    btn.disabled = !buildFeedUrl();
+}
 </script>
 </body>
 </html>
