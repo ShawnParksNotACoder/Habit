@@ -352,6 +352,13 @@ const PRODUCTS = [
     {v:'acc',       l:'Accessories', on:false},
 ];
 
+// ── State ─────────────────────────────────────────────────────────────────────
+let running       = false;
+let monitorTimer  = null;
+let countdownTimer= null;
+let audioCtx      = null;
+let checkLog      = [];
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 (function() {
     const cs = document.getElementById('countrySelect');
@@ -377,13 +384,6 @@ const PRODUCTS = [
 
     updateUrl();
 })();
-
-// ── State ─────────────────────────────────────────────────────────────────────
-let running       = false;
-let monitorTimer  = null;
-let countdownTimer= null;
-let audioCtx      = null;
-let checkLog      = [];
 
 // ── URL builder ───────────────────────────────────────────────────────────────
 function buildFeedUrl() {
