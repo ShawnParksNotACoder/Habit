@@ -479,26 +479,53 @@ async function fetchXml() {
     const url = buildFeedUrl();
     if (!url) throw new Error('No products selected');
 
-    let directErr = null;
+    const enc = encodeURIComponent(url);
 
-    try {
-        const r = await fetch(url, { mode: 'cors' });
-        if (r.ok) return await r.text();
-        directErr = `Direct fetch: HTTP ${r.status} ${r.statusText || ''}`.trim();
-    } catch (e) {
-        directErr = `Direct fetch: ${e.message}`;
+    const attempts = [
+        { label: 'Direct',
+          fn: async () => {
+            const r = await fetch(url);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return await r.text();
+          }
+        },
+        { label: 'corsproxy.io',
+          fn: async () => {
+            const r = await fetch(`https://corsproxy.io/?${enc}`);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return await r.text();
+          }
+        },
+        { label: 'allorigins (raw)',
+          fn: async () => {
+            const r = await fetch(`https://api.allorigins.win/raw?url=${enc}`);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return await r.text();
+          }
+        },
+        { label: 'allorigins (json)',
+          fn: async () => {
+            const r = await fetch(`https://api.allorigins.win/get?url=${enc}`);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            const j = await r.json();
+            if (!j.contents) throw new Error('empty response');
+            return j.contents;
+          }
+        },
+    ];
+
+    const errors = [];
+    for (const { label, fn } of attempts) {
+        try { return await fn(); }
+        catch (e) { errors.push(`${label}: ${e.message}`); }
     }
 
-    try {
-        const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-        const r = await fetch(proxy);
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const json = await r.json();
-        if (!json.contents) throw new Error('Empty response from proxy');
-        return json.contents;
-    } catch (e) {
-        throw new Error(`${directErr}\nProxy fallback: ${e.message}`);
-    }
+    throw new Error(
+        errors.join('\n') +
+        '\n\nIf all proxies show "Failed to fetch", try serving this file ' +
+        'from a local web server instead of opening it directly:\n' +
+        '  npx serve . OR python3 -m http.server 8080'
+    );
 }
 
 function parseEntries(xml) {
