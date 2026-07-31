@@ -1,0 +1,16 @@
+{
+  "name": "habit-tracker-alexa-skill",
+  "version": "1.0.0",
+  "description": "Alexa skill backend for ADHD Habit Tracker",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "ask-sdk-core": "^2.14.0",
+    "ask-sdk-dynamodb-persistence-adapter": "^2.1.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

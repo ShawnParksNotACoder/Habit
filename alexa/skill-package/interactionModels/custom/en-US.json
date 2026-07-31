@@ -1,0 +1,232 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "habit tracker",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "LaunchIntent",
+          "samples": [
+            "open habit tracker",
+            "start habit tracker",
+            "launch habit tracker"
+          ]
+        },
+        {
+          "name": "MarkHabitDoneIntent",
+          "slots": [
+            {
+              "name": "habit",
+              "type": "HabitType"
+            }
+          ],
+          "samples": [
+            "mark {habit} as done",
+            "mark {habit} complete",
+            "I completed {habit}",
+            "I did {habit}",
+            "I finished {habit}",
+            "log {habit}",
+            "check off {habit}",
+            "done with {habit}",
+            "{habit} is done",
+            "{habit} complete",
+            "I did my {habit}"
+          ]
+        },
+        {
+          "name": "ListHabitsIntent",
+          "samples": [
+            "what are my habits",
+            "list my habits",
+            "show my habits",
+            "what habits do I have",
+            "tell me my habits",
+            "what should I be doing"
+          ]
+        },
+        {
+          "name": "GetProgressIntent",
+          "samples": [
+            "how am I doing",
+            "what is my progress",
+            "how am I doing today",
+            "what is today's progress",
+            "give me my progress",
+            "check my progress",
+            "how many habits have I done",
+            "how many habits did I complete",
+            "what did I complete today",
+            "how close am I to my goal"
+          ]
+        },
+        {
+          "name": "AddHabitIntent",
+          "slots": [
+            {
+              "name": "habit",
+              "type": "HabitType"
+            }
+          ],
+          "samples": [
+            "add {habit} to my habits",
+            "add {habit} as a habit",
+            "create a habit for {habit}",
+            "new habit {habit}",
+            "track {habit}",
+            "I want to track {habit}"
+          ]
+        },
+        {
+          "name": "RemoveHabitIntent",
+          "slots": [
+            {
+              "name": "habit",
+              "type": "HabitType"
+            }
+          ],
+          "samples": [
+            "remove {habit} from my habits",
+            "delete {habit} habit",
+            "stop tracking {habit}",
+            "remove {habit}"
+          ]
+        },
+        {
+          "name": "UnmarkHabitIntent",
+          "slots": [
+            {
+              "name": "habit",
+              "type": "HabitType"
+            }
+          ],
+          "samples": [
+            "unmark {habit}",
+            "I did not do {habit}",
+            "I didn't do {habit}",
+            "mark {habit} as not done",
+            "undo {habit}"
+          ]
+        },
+        {
+          "name": "StartPomodoroIntent",
+          "slots": [
+            {
+              "name": "minutes",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "start a pomodoro",
+            "start focus mode",
+            "start a focus timer",
+            "start a {minutes} minute focus timer",
+            "start a {minutes} minute pomodoro",
+            "set a focus timer for {minutes} minutes",
+            "pomodoro",
+            "focus timer",
+            "start focus session"
+          ]
+        },
+        {
+          "name": "GetStreakIntent",
+          "slots": [
+            {
+              "name": "habit",
+              "type": "HabitType"
+            }
+          ],
+          "samples": [
+            "what is my streak for {habit}",
+            "how long is my {habit} streak",
+            "how many days in a row have I done {habit}",
+            "what is my {habit} streak"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "HabitType",
+          "values": [
+            { "name": { "value": "exercise", "synonyms": ["workout", "work out", "gym", "working out"] } },
+            { "name": { "value": "meditation", "synonyms": ["meditate", "mindfulness"] } },
+            { "name": { "value": "reading", "synonyms": ["read", "read a book"] } },
+            { "name": { "value": "journaling", "synonyms": ["journal", "write in journal", "write in my journal"] } },
+            { "name": { "value": "water", "synonyms": ["drink water", "hydration", "hydrate"] } },
+            { "name": { "value": "sleep", "synonyms": ["sleeping", "go to bed on time", "bed time", "bedtime"] } },
+            { "name": { "value": "vitamins", "synonyms": ["vitamin", "supplements", "take my vitamins"] } },
+            { "name": { "value": "stretching", "synonyms": ["stretch", "yoga"] } },
+            { "name": { "value": "cooking", "synonyms": ["cook", "meal prep"] } },
+            { "name": { "value": "walking", "synonyms": ["walk", "take a walk"] } }
+          ]
+        }
+      ]
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "MarkHabitDoneIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "habit",
+              "type": "HabitType",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.MarkHabitDoneIntent.habit"
+              }
+            }
+          ]
+        },
+        {
+          "name": "AddHabitIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "habit",
+              "type": "HabitType",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.AddHabitIntent.habit"
+              }
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.MarkHabitDoneIntent.habit",
+        "variations": [
+          { "type": "PlainText", "value": "Which habit did you complete?" }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.AddHabitIntent.habit",
+        "variations": [
+          { "type": "PlainText", "value": "What habit would you like to add?" }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "name": "ADHD Habit Tracker",
+          "summary": "Track your daily habits and focus sessions hands-free with your voice.",
+          "description": "ADHD Habit Tracker lets you log completed habits, check your daily progress, and start Pomodoro focus timers — all without touching your phone or computer. Say 'Alexa, open Habit Tracker' to get started.",
+          "examplePhrases": [
+            "Alexa, open Habit Tracker",
+            "Mark exercise as done",
+            "How am I doing today?"
+          ],
+          "keywords": [
+            "habit",
+            "tracker",
+            "adhd",
+            "productivity",
+            "pomodoro",
+            "focus"
+          ]
+        }
+      },
+      "isAvailableWorldwide": false,
+      "testingInstructions": "Enable the skill, then say 'Alexa, open Habit Tracker'.",
+      "category": "HEALTH_AND_FITNESS",
+      "distributionCountries": ["US"]
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "sourceDir": "lambda"
+        },
+        "interfaces": []
+      }
+    },
+    "manifestVersion": "1.0",
+    "permissions": [
+      { "name": "alexa::profile:name:read" }
+    ],
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "usesPersonalInfo": false,
+      "isChildDirected": false,
+      "isExportCompliant": true,
+      "containsAds": false
+    }
+  }
+}
